@@ -1,0 +1,22 @@
+recorded: 2026-08-09T10:31:17Z
+host: Linux 7.1.4-204.fc44.x86_64 x86_64 GNU/Linux
+
+## workspace repos
+fmsg-spec: d8e9446 (2026-08-09)
+fmsgd: b6a9d2a (2026-08-09)
+fmsg-webapi: 9a5451e (2026-08-05)
+fmsgid: 5a74176 (2026-08-03)
+fmsg-cli: f450ba5 (2026-08-05)
+fmsg-docker: 29bc006 (2026-08-05)
+fmsg-bench: (not a git checkout)
+
+## tools
+tcpdump version 4.99.6
+go version go1.26.4 linux/amd64
+Python 3.14.6
+jq-1.8.1
+
+## payloads
+bd2d6fbef9eee073ec42627be5c21857e5e13b2172c692049092be4356ff965f  /home/markmnl/github.com/fmsg/fmsg-bench/scenarios/payloads/attach-10KiB.bin
+fab28477ff0ed0bfa700de7e1449f6e30ff6a7de9cff269d8995a77af0d46adb  /home/markmnl/github.com/fmsg/fmsg-bench/scenarios/payloads/attach-1MiB.bin
+230391ff7e0219baa9df49685d8cc3389a0707d031ffe8f209961c9f45f804d8  /home/markmnl/github.com/fmsg/fmsg-bench/scenarios/payloads/body-120B.txt

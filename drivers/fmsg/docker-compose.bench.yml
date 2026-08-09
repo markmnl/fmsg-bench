@@ -1,0 +1,16 @@
+# Bench override applied on top of fmsg-docker's compose + test override.
+#
+# - FMSG_POLL_INTERVAL=1: the sender polls the DB for pending messages;
+#   the default 10s would idle every repetition (wire time is measured
+#   from first SYN so timings are unaffected, but reps would crawl).
+# - FMSG_MAX_MSG_SIZE=2097152: default 10240 would reject the 1 MiB
+#   attachment scenarios.
+# - FMSG_RETRY_INTERVAL=2: don't stall a repetition for 20s if a
+#   delivery attempt transiently fails.
+
+services:
+  fmsgd:
+    environment:
+      FMSG_POLL_INTERVAL: "1"
+      FMSG_MAX_MSG_SIZE: "2097152"
+      FMSG_RETRY_INTERVAL: "2"

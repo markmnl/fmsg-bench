@@ -1,0 +1,46 @@
+# Two whatsapp-web.js clients:
+#   wa-bot        measured side — alone on the wa-bench bridge so every
+#                 byte on that bridge is attributable to it
+#   wa-responder  second account, unmeasured, default network
+#
+# One-time pairing: curl localhost:3999/pair and localhost:3998/pair,
+# scan each QR (also printed in `podman compose logs`).
+
+services:
+  wa-bot:
+    build: .
+    command: ["node", "bot.js"]
+    environment:
+      WA_CONTROL_PORT: "3999"
+      WA_SESSION_DIR: /session
+    volumes:
+      - wa_bot_session:/session
+      - ../../scenarios/payloads:/payloads:ro,z
+    ports:
+      - "3999:3999"
+    networks:
+      - wa-bench
+    restart: unless-stopped
+
+  wa-responder:
+    build: .
+    command: ["node", "responder.js"]
+    environment:
+      WA_CONTROL_PORT: "3998"
+      WA_SESSION_DIR: /session
+    volumes:
+      - wa_responder_session:/session
+    ports:
+      - "3998:3998"
+    networks:
+      - default
+    restart: unless-stopped
+
+volumes:
+  wa_bot_session:
+  wa_responder_session:
+
+networks:
+  default:
+  wa-bench:
+    name: wa-bench

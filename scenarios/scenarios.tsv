@@ -1,0 +1,17 @@
+id	messages	participants	attach	modifier	tier	systems	notes
+m1p2	1	2	-	-	core	fmsg,email,whatsapp
+m2p2	2	2	-	-	core	fmsg,email,whatsapp
+m3p2	3	2	-	-	core	fmsg,email,whatsapp
+m4p2	4	2	-	-	core	fmsg,email,whatsapp
+m5p2	5	2	-	-	core	fmsg,email,whatsapp
+m1p2a10k	1	2	attach-10KiB.bin	-	core	fmsg,email,whatsapp
+m1p2a1m	1	2	attach-1MiB.bin	-	core	fmsg,email,whatsapp	whatsapp: sent as document to avoid transcoding
+m1p5	1	5	-	-	core	fmsg,email,whatsapp	whatsapp: group of 5 (nearest equivalent)
+m1p5a10k	1	5	attach-10KiB.bin	-	core	fmsg,email,whatsapp
+m1p5a1m	1	5	attach-1MiB.bin	-	core	fmsg,email,whatsapp
+m5p4	5	4	-	-	core	fmsg,email,whatsapp	whatsapp: only 2 automatable senders in group of 4
+m1p2-fwd	1	2	-	fwd	core	fmsg,email	whatsapp: N/A — true forward not automatable (whatsapp-web.js/WA Web incompatibility); forward semantics differ regardless (no history transfer)
+m1p2a1m-fwd	1	2	attach-1MiB.bin	fwd	core	fmsg,email	whatsapp: N/A — true forward not automatable (whatsapp-web.js/WA Web incompatibility); forward semantics differ regardless (no history transfer)
+m3p2-br	3	2	-	br	core	fmsg,email,whatsapp	whatsapp: quoted replies, flat thread semantics
+m10p2	10	2	-	-	extended	fmsg,email,whatsapp	per-message growth analysis
+m20p2	20	2	-	-	extended	fmsg,email,whatsapp	per-message growth analysis
