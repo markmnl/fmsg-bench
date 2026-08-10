@@ -30,11 +30,15 @@ blog write-up: [`results/blog-summary.md`](results/blog-summary.md)
 - Scenario descriptions are neutral user actions; protocol behaviour
   differences are surfaced by the results analysis, not baked into the
   tests.
-- Repetitions: fmsg and email run 1 per scenario (their byte counts are
-  stable across runs); WhatsApp runs 5 (analysis reports median, min,
-  max). Repetitions are **additive**: a rep already in `results.csv` is
-  skipped on re-run, so new scenarios extend the dataset without
-  disturbing it.
+- 1 repetition per scenario by default (`--reps N` to override) — byte
+  counts are stable across runs; the historical WhatsApp dataset used 5
+  (analysis reports median, min, max where present). Repetitions are
+  **additive**: a rep already in `results.csv` is skipped on re-run, so
+  new scenarios extend the dataset without disturbing it.
+- At driver start the handful of API hostnames are resolved once and
+  pinned in `/etc/hosts` for the duration of the run (marked block,
+  removed on exit) — driver pacing must not depend on the local
+  resolver's mood. Wire captures are unaffected either way.
 
 Per-system measurement points:
 

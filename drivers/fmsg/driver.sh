@@ -70,6 +70,17 @@ driver_init() {
     P_APIS+=("${api:-$(cfg REMOTE_API)}")
   done
 
+  # Pin the API hostnames for the run so every fmsg-cli invocation skips
+  # name resolution (see lib/dns-pin.sh).
+  local -a api_hosts=()
+  local u h
+  for u in "${P_APIS[@]}"; do
+    [ -n "$u" ] || continue
+    h="${u#*://}"; h="${h%%[/:]*}"
+    case " ${api_hosts[*]-} " in *" $h "*) ;; *) api_hosts+=("$h") ;; esac
+  done
+  dns_pin "${api_hosts[@]}"
+
   FMSG_SSH_HOST="$(cfg SSH_HOST)"
   FMSG_WAN_IFACE="$(cfg WAN_IFACE)"
   [ -n "$FMSG_SSH_HOST" ] && [ -n "$FMSG_WAN_IFACE" ] \

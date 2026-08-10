@@ -47,6 +47,11 @@ driver_init() {
 
   local env_file="$HOME/.config/fmsg-bench/email.env"
   [ -f "$env_file" ] || fail "missing $env_file"
+
+  # Pin the responder-API hostnames for the run (SMTP/IMAP go via the SSH
+  # tunnel to localhost and need no DNS); see lib/dns-pin.sh.
+  dns_pin gmail.googleapis.com oauth2.googleapis.com \
+    graph.microsoft.com login.microsoftonline.com
   REMOTE_BASE="$(sed -n 's/^BENCH_REMOTE_ADDR=//p' "$env_file")"
   [ -n "$REMOTE_BASE" ] || fail "BENCH_REMOTE_ADDR not set in $env_file"
   LOCAL_BASE="$(sed -n 's/^BENCH_LOCAL_ADDR=//p' "$env_file")"
