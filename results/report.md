@@ -7,61 +7,63 @@ median of the repetitions per scenario. Raw per-repetition data:
 
 ## Table 1 — bytes over the wire
 
-| ID | Scenario (user action) | fmsg | fmsg-lab | email | whatsapp |
-|---|---|---|---|---|---|
-| m1p2 | one message to 1 recipient | 16.4 kB | 9.5 kB | 12.9 kB | 4.8 kB |
-| m2p2 | 2 messages between 2 participants, each a reply to the previous | 24.8 kB | 19.3 kB | 27.8 kB | 6.1 kB |
-| m3p2 | 3 messages between 2 participants, each a reply to the previous | 33.1 kB | 28.9 kB | 41.1 kB | 16.6 kB |
-| m4p2 | 4 messages between 2 participants, each a reply to the previous | 41.5 kB | 38.6 kB | 57.0 kB | 17.4 kB |
-| m5p2 | 5 messages between 2 participants, each a reply to the previous | 49.7 kB | 48.2 kB | 70.8 kB | 26.0 kB |
-| m1p2a10k | one message to 1 recipient; first message carries a 10 KiB attachment | 27.2 kB | 20.3 kB | 28.4 kB | 26.8 kB |
-| m1p2a1m | one message to 1 recipient; first message carries a 1 MiB attachment | 1.12 MB | 1.06 MB | 1.51 MB | 1.14 MB |
-| m1p5 | one message to 4 recipients | — | 9.8 kB | 13.8 kB | 2.1 kB |
-| m1p5a10k | one message to 4 recipients; first message carries a 10 KiB attachment | — | 20.3 kB | 29.1 kB | 23.2 kB |
-| m1p5a1m | one message to 4 recipients; first message carries a 1 MiB attachment | — | 1.06 MB | 1.52 MB | 1.13 MB |
-| m5p4 | 5 messages between 4 participants, each a reply to the previous | — | 48.4 kB | 73.3 kB | 218.8 kB |
-| m1p2-fwd | one message to 1 recipient; then an additional participant is brought into the message | 32.4 kB | 19.1 kB | 26.2 kB | — |
-| m1p2a1m-fwd | one message to 1 recipient; first message carries a 1 MiB attachment; then an additional participant is brought into the message | 1.14 MB | 1.07 MB | 3.02 MB | — |
-| m3p2-br | 3 messages between 2 participants, each a reply to the previous; the final two messages are both replies to the first message | 33.3 kB | 29.0 kB | 42.5 kB | 13.9 kB |
-| m10p2 | 10 messages between 2 participants, each a reply to the previous | 91.7 kB | 96.4 kB | 151.0 kB | 75.5 kB |
-| m20p2 | 20 messages between 2 participants, each a reply to the previous | 175.4 kB | 193.0 kB | 333.8 kB | 132.4 kB |
-| m200p2 | 200 messages between 2 participants, each a reply to the previous | 1.68 MB | — | 18.19 MB | 1.19 MB |
-| m1p2ascr | one message to 1 recipient; first message carries a realistic screenshot (PNG, ~336 kB) | 367.9 kB | — | 496.4 kB | 45.7 kB |
-| m1p2aimg | one message to 1 recipient; first message carries a realistic photo (JPG, ~1.0 MB) | 1.09 MB | — | 1.47 MB | 59.3 kB |
-| m1p2adoc | one message to 1 recipient; first message carries a realistic document (ODT, ~377 kB) | 414.0 kB | — | 555.4 kB | 418.6 kB |
-| m1p3 | one message to 2 recipients | 16.4 kB | — | 13.2 kB | — |
-| m1p3x | one message to 2 recipients; recipients on two different domains | 32.8 kB | — | 13.5 kB | — |
-| m10p4x | 10 messages between 4 participants, each a reply to the previous; recipients on two different domains | 150.1 kB | — | 164.0 kB | — |
-| m10p3x | 10 messages between 3 participants, each a reply to the previous; recipients on two different domains | 133.4 kB | — | — | — |
+| ID | Scenario (user action) | fmsg | email | whatsapp |
+|---|---|---|---|---|
+| m1p2 | one message to 1 recipient | 16.7 kB | 25.0 kB | 4.8 kB |
+| m2p2 | 2 messages between 2 participants, each a reply to the previous | 14.7 kB | 35.6 kB | 6.1 kB |
+| m3p2 | 3 messages between 2 participants, each a reply to the previous | 19.6 kB | 55.4 kB | 16.6 kB |
+| m4p2 | 4 messages between 2 participants, each a reply to the previous | 24.6 kB | 70.8 kB | 17.4 kB |
+| m5p2 | 5 messages between 2 participants, each a reply to the previous | 29.7 kB | 92.2 kB | 26.0 kB |
+| m1p5 | one message to 4 recipients | — | 20.9 kB | 2.1 kB |
+| m3p2-br | 3 messages between 2 participants, each a reply to the previous; the final two messages are both replies to the first message | 19.6 kB | 49.8 kB | 13.9 kB |
+| m5p4 | 5 messages between 4 participants, each a reply to the previous | — | 92.1 kB | 218.8 kB |
+| m10p2 | 10 messages between 2 participants, each a reply to the previous | 54.3 kB | 186.6 kB | 75.5 kB |
+| m20p2 | 20 messages between 2 participants, each a reply to the previous | 103.8 kB | 425.2 kB | 132.4 kB |
+| m1p2a10k | one message to 1 recipient; first message carries a 10 KiB attachment | 20.3 kB | 35.4 kB | 26.8 kB |
+| m1p2a1m | one message to 1 recipient; first message carries a 1 MiB attachment | 1.11 MB | 1.52 MB | 1.14 MB |
+| m1p5a10k | one message to 4 recipients; first message carries a 10 KiB attachment | — | 36.3 kB | 23.2 kB |
+| m1p5a1m | one message to 4 recipients; first message carries a 1 MiB attachment | — | 1.53 MB | 1.13 MB |
+| m200p2 | 200 messages between 2 participants, each a reply to the previous | 998.5 kB | — | 1.19 MB |
+| m1p2ascr | one message to 1 recipient; first message carries a realistic screenshot (PNG, ~336 kB) | 360.9 kB | 505.8 kB | 45.7 kB |
+| m1p2aimg | one message to 1 recipient; first message carries a realistic photo (JPG, ~1.0 MB) | 1.09 MB | 1.48 MB | 59.3 kB |
+| m1p2adoc | one message to 1 recipient; first message carries a realistic document (ODT, ~377 kB) | 404.3 kB | 565.8 kB | 418.6 kB |
+| m1p2-fwd | one message to 1 recipient; then an additional participant is brought into the message | 18.9 kB | 40.2 kB | — |
+| m1p2a1m-fwd | one message to 1 recipient; first message carries a 1 MiB attachment; then an additional participant is brought into the message | 1.13 MB | 3.05 MB | — |
+| m100p2 | 100 messages between 2 participants, each a reply to the previous | 500.9 kB | — | — |
+| m10p3x | 10 messages between 3 participants, each a reply to the previous; recipients on two different domains | 79.3 kB | 259.8 kB | — |
+| m1p3 | one message to 2 recipients | 9.6 kB | 20.3 kB | — |
+| m1p3x | one message to 2 recipients; recipients on two different domains | 19.4 kB | 35.1 kB | — |
+| m10p4x | 10 messages between 4 participants, each a reply to the previous; recipients on two different domains | 89.2 kB | 237.0 kB | — |
 
 ## Table 2 — transmission time (seconds, median)
 
-| ID | fmsg | fmsg-lab | email | whatsapp |
-|---|---|---|---|---|
-| m1p2 | 1.4324 | 0.0288 | 1.3827 | 1.6954 |
-| m2p2 | 6.7129 | 0.6149 | 23.3177 | 4.1779 |
-| m3p2 | 9.7235 | 1.1891 | 26.2042 | 5.8974 |
-| m4p2 | 14.0143 | 1.7611 | 40.8344 | 6.3253 |
-| m5p2 | 17.7455 | 2.3366 | 45.672 | 6.8419 |
-| m1p2a10k | 1.4391 | 0.0293 | 0.9072 | 5.2004 |
-| m1p2a1m | 2.6307 | 0.0316 | 1.2637 | 6.5225 |
-| m1p5 | — | 0.0554 | 1.3889 | 1.9718 |
-| m1p5a10k | — | 0.059 | 0.8846 | 5.2287 |
-| m1p5a1m | — | 0.0585 | 1.8043 | 5.8949 |
-| m5p4 | — | 2.4878 | 41.8344 | 14.7419 |
-| m1p2-fwd | 3.3794 | 0.6042 | 13.4826 | — |
-| m1p2a1m-fwd | 4.9249 | 0.6126 | 27.4861 | — |
-| m3p2-br | 9.8816 | 1.2173 | 29.3919 | 6.8302 |
-| m10p2 | 38.147 | 5.2154 | 103.2229 | 25.8924 |
-| m20p2 | 78.3173 | 10.7383 | 203.5202 | 63.6502 |
-| m200p2 | 706.3895 | — | 2559.3081 | 357.2406 |
-| m1p2ascr | 2.1813 | — | 1.1264 | 4.1428 |
-| m1p2aimg | 2.6873 | — | 1.2726 | 4.3586 |
-| m1p2adoc | 2.2604 | — | 1.1395 | 3.4754 |
-| m1p3 | 1.442 | — | 1.0269 | — |
-| m1p3x | 7.0316 | — | 2.9038 | — |
-| m10p4x | 107.1787 | — | 84.102 | — |
-| m10p3x | 104.7156 | — | — | — |
+| ID | fmsg | email | whatsapp |
+|---|---|---|---|
+| m1p2 | 1.4575 | 3.0309 | 1.6954 |
+| m2p2 | 24.2097 | 21.5805 | 4.1779 |
+| m3p2 | 54.8652 | 22.0655 | 5.8974 |
+| m4p2 | 83.2047 | 33.0247 | 6.3253 |
+| m5p2 | 108.3593 | 39.1347 | 6.8419 |
+| m1p5 | — | 3.3068 | 1.9718 |
+| m3p2-br | 42.4923 | 21.2794 | 6.8302 |
+| m5p4 | — | 30.033 | 14.7419 |
+| m10p2 | 235.4771 | 77.5551 | 25.8924 |
+| m20p2 | 71.9418 | 125.5762 | 63.6502 |
+| m1p2a10k | 1.4203 | 2.9734 | 5.2004 |
+| m1p2a1m | 2.6077 | 10.1834 | 6.5225 |
+| m1p5a10k | — | 3.6363 | 5.2287 |
+| m1p5a1m | — | 11.1722 | 5.8949 |
+| m200p2 | 5319.4477 | — | 357.2406 |
+| m1p2ascr | 2.1983 | 5.1875 | 4.1428 |
+| m1p2aimg | 2.6205 | 9.8322 | 4.3586 |
+| m1p2adoc | 2.2335 | 6.1158 | 3.4754 |
+| m1p2-fwd | 14.1331 | 10.8075 | — |
+| m1p2a1m-fwd | 14.1694 | 26.8493 | — |
+| m100p2 | 346.4406 | — | — |
+| m10p3x | 95.8682 | 69.6266 | — |
+| m1p3 | 1.422 | 3.0951 | — |
+| m1p3x | 7.1103 | 5.1697 | — |
+| m10p4x | 92.8701 | 85.8401 | — |
 
 ## Figures
 
@@ -84,17 +86,16 @@ a capability gap, not a missing measurement:
 
 ## Method notes & caveats
 
-- **fmsg**: two REAL production hosts on opposite sides of the world,
+- **fmsg**: real production hosts on three domains spanning the world,
   host-to-host fmsg (TCP 4930) captured at the local host and filtered to
   the remote host's IPs. Challenge mode is the fmsgd default
   (HAS_NOT_PARTICIPATED): only first-contact messages incur the
   challenge-response second connection. TLS uses production certificate
-  chains. Timings cross the real internet — indicative, like email's.
-- **fmsg-lab**: the same protocol between two containerised stacks on one
-  machine (self-signed certs, challenge ALWAYS, LAN-free bridge) — the
-  fully replicable environment. Byte differences vs fmsg are certificate
-  chain size and challenge frequency.
-- **email**: self-hosted mailcow ↔ Gmail over the public internet.
+  chains with session resumption — connections after the first to a
+  given host resume and skip the certificate exchange. Timings cross
+  the real internet — indicative, like email's.
+- **email**: self-hosted mailcow ↔ Gmail (and, in cross-provider
+  scenarios, ↔ Outlook via Microsoft Graph) over the public internet.
   Outbound leaves via a smarthost relay (port 2525) — typical for
   residential hosting where ISPs block direct port 25 — so the measured
   outbound hop is mailcow→relay; inbound is Gmail→mailcow on port 25,
@@ -111,8 +112,10 @@ a capability gap, not a missing measurement:
 - Message bodies are natural-language text cut to exactly 120 bytes each;
   attachments are incompressible random bytes (regenerable from a fixed
   seed; unique per repetition on WhatsApp, which dedupes repeat media).
-- Byte counts are stable across runs; timings vary — treat every duration
-  as indicative.
+- Repetitions: fmsg and email run one repetition per scenario — their
+  byte counts are stable across runs; whatsapp runs five (medians
+  reported, idle baseline subtracted). Timings vary — treat every
+  duration as indicative.
 
 ## Appendix — software versions
 
@@ -146,7 +149,6 @@ fab28477ff0ed0bfa700de7e1449f6e30ff6a7de9cff269d8995a77af0d46adb  /home/markmnl/
 ```sh
 ./scenarios/gen-payloads.sh
 ./bench.sh fmsg          # real hosts — needs ~/.config/fmsg-bench/fmsg.env
-./drivers/fmsg-lab/lab-up.sh && ./bench.sh fmsg-lab   # replicable lab
 ./bench.sh email         # needs mailcow + Gmail OAuth (see README)
 ./drivers/whatsapp/baseline.sh && ./bench.sh whatsapp
 python3 analysis/summarize.py && python3 analysis/charts.py && python3 analysis/report.py

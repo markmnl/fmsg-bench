@@ -5,116 +5,133 @@ open host-to-host messaging protocol), email (SMTP), and WhatsApp — and
 measured what actually crosses the wire: every frame, TLS handshakes and
 all, from first SYN to last FIN. All three ran over the real internet:
 fmsg between production hosts on three domains spanning opposite sides of
-the world, email between a self-hosted mail server, Gmail, and Outlook,
-and WhatsApp between two phones' linked clients. The harness, raw data,
-and charts are in [fmsg-bench](https://github.com/markmnl/fmsg-bench).
+the world, email between a self-hosted mail server and Gmail/Outlook —
+direct MX-to-MX, no relay — and WhatsApp between two phones' linked
+clients. The harness, raw data, and charts are in
+[fmsg-bench](https://github.com/markmnl/fmsg-bench).
 
 ## Method in one paragraph
 
 Every scenario sends the same content on every system: natural-language
-message bodies of exactly 120 bytes, identical attachments, five
-repetitions (medians reported; email one repetition — its byte counts are
-stable). fmsg and email were captured host-to-host at the local host's
-network interface; WhatsApp has no observable host-to-host wire, so its
-numbers are the client's traffic to Meta's servers (TCP and UDP — media
-rides QUIC) less an idle baseline. Scenario IDs read like `m5p2`: 5
-messages, 2 participants; `a1m` = 1 MiB attachment; `x` = recipients on
-different domains; `-fwd` = bring a third participant into an existing
-message. A separately reported lab column (`fmsg-lab`, two containerised
-stacks on one machine) provides a fully replicable baseline for fmsg.
+message bodies of exactly 120 bytes, identical attachments. fmsg and
+email were captured host-to-host at the local host's network interface;
+WhatsApp has no observable host-to-host wire, so its numbers are the
+client's traffic to Meta's servers (TCP and UDP — media rides QUIC) less
+an idle baseline. Byte counts are stable across repetitions, so fmsg and
+email run one repetition per scenario (WhatsApp: five, medians reported).
+Scenario IDs read like `m5p2`: 5 messages, 2 participants; `a1m` = 1 MiB
+attachment; `x` = recipients on different domains; `-fwd` = bring a third
+participant into an existing message. fmsg messages travel inside TLS 1.3
+from the first byte, with session resumption: the first-ever contact
+between two hosts pays full handshakes, and every connection after that
+skips the certificate exchange. Email travels as STARTTLS-upgraded SMTP
+on port 25, as mail servers really exchange it.
 
 ## Conversations
 
 | messages exchanged | fmsg | email | whatsapp |
 |---|---|---|---|
-| 1 | 16.4 kB | 12.9 kB | 4.8 kB |
-| 5 | 49.7 kB | 70.8 kB | 26.0 kB |
-| 20 | 175 kB | 334 kB | 132 kB |
-| **200** | **1.68 MB** | **18.19 MB** | **1.19 MB** |
+| 1 | 16.7 kB | 25.0 kB | 4.8 kB |
+| 5 | 29.7 kB | 92.2 kB | 26.0 kB |
+| 20 | 103.8 kB | 425.2 kB | 132.4 kB |
+| 100 | **500.9 kB** | —† | — |
+| 200 | **998.5 kB** | — | 1.19 MB |
+
+† not yet measured: Gmail rejects direct senders whose IP lacks a custom
+PTR record once volume grows (it cut this run off at message 61) — the
+point will be added once the reverse-DNS entry lands.
 
 ![conversation growth](charts/conversation-growth.svg)
 
-WhatsApp is cheapest per message — one long-lived multiplexed connection.
-fmsg pays a TLS handshake per message but stays **linear**: a reply
-references its parent by a 32-byte hash, so message 200 costs the same as
-message 2 (five repetitions of the 200-message conversation landed within
-±0.1% of each other). Email's replies quote the entire history each time,
-so its per-message cost *grows* — by 200 messages it is paying ~91 kB per
-message and the conversation has cost **10× fmsg**. And that is with
-120-byte messages; the gap widens with longer ones.
+fmsg's line is **flat**: a reply references its parent by a 32-byte hash,
+and with TLS session resumption each message costs ~5 kB regardless of
+how deep the conversation is — by 200 messages it is the cheapest system
+measured, under WhatsApp's single multiplexed connection. Email's replies
+quote the entire history each time, so its per-message cost *grows*: by
+message 20 it is paying over 20 kB per message and the conversation has
+cost **4× fmsg** — and that is with 120-byte messages; the gap widens
+with longer ones. Even a single message costs less on fmsg than email
+(16.7 kB vs 25.0 kB — and that fmsg figure is the worst case, first-ever
+contact between two hosts; between hosts that have spoken recently it
+drops to ~9.6 kB).
 
 ## Attachments
 
 | attachment | fmsg | email | whatsapp |
 |---|---|---|---|
-| 1 MiB (incompressible) | 1.12 MB | 1.51 MB | 1.14 MB |
-| screenshot, 336 kB PNG | 368 kB | 496 kB | 45.7 kB |
-| photo, 1.02 MB JPG | 1.09 MB | 1.47 MB | **59.3 kB** |
-| document, 377 kB ODT | 414 kB | 555 kB | 419 kB |
+| 1 MiB (incompressible) | 1.11 MB | 1.52 MB | 1.14 MB |
+| screenshot, 336 kB PNG | 361 kB | 506 kB | 45.7 kB |
+| photo, 1.02 MB JPG | 1.09 MB | 1.48 MB | **59.3 kB** |
+| document, 377 kB ODT | 404 kB | 566 kB | 419 kB |
 
-fmsg sends raw binary: a few percent of framing over the file itself.
-Email still base64-encodes everything inside MIME: **+33% on every
-attachment, every hop**. WhatsApp's numbers hide a trade: images pass
-through its native pipeline and get recompressed — the 1 MB photo
-travelled as 59 kB, quality silently traded for bandwidth — while
-documents upload verbatim (and its servers deduplicate repeat content:
-sending the same file twice never uploads it again).
+fmsg sends raw binary: 5–7% of framing over the file itself. Email still
+base64-encodes everything inside MIME: **~45% over the raw file, on
+every hop**. WhatsApp's numbers hide a trade: images pass through its
+native pipeline and get recompressed — the 1 MB photo travelled as
+59 kB, quality silently traded for bandwidth — while documents upload
+verbatim (and its servers deduplicate repeat content: sending the same
+file twice never uploads it again).
 
 ## Bringing someone into a conversation
 
 | action | fmsg | email | whatsapp |
 |---|---|---|---|
-| add a participant to a sent 1 MiB message | **+19 kB** | +1.51 MB | not supported |
+| add a participant to a sent 1 MiB message | **+26 kB** | +1.53 MB | not supported |
 
 This is where protocol design diverges most. fmsg's `add-to` re-sends
 only a header; hosts that already hold the message answer "skip the
 data", so the attachment never travels again — the newcomer's host
 fetches what it lacks and everyone's thread is intact. Email can only
 *forward*: the entire MIME body, base64 attachment included, is
-re-transmitted — ~80× the bytes here. WhatsApp has no equivalent at all:
-adding someone to a group shares no history with them.
+re-transmitted — **~58× the bytes** here. WhatsApp has no equivalent at
+all: adding someone to a group shares no history with them.
 
-## Recipients on different domains
+## Recipients on multiple domains
 
 | scenario | fmsg | email |
 |---|---|---|
-| 1 message → 2 recipients, same remote domain | 16.4 kB | 13.2 kB |
-| 1 message → 2 recipients, different domains | 32.8 kB | 13.5 kB |
-| 10-message conversation, 4 participants, 3 domains | 150 kB | 164 kB |
+| 1 message → 2 recipients (one remote domain) | 9.6 kB | 20.3 kB |
+| 1 message → 2 recipients, different domains | 19.4 kB | 35.1 kB |
+| 10-message conversation, 3 participants, 3 domains | 79.3 kB | 259.8 kB |
+| 10-message conversation, 4 participants, 3 domains | 89.2 kB | 237.0 kB |
 
-fmsg opens one connection per recipient *domain* from the sender's own
-host — visible on the wire as double cost for two domains. The email
-sender's wire barely moves because a smarthost relay accepts one
-transaction and performs the per-provider fan-out downstream, out of
-sight (self-hosted mail on residential connections must relay — ISPs
-block direct SMTP). Over a full three-domain conversation the totals
-converge; the difference is *where* the fan-out happens and who carries
-it. WhatsApp has no notion of domains — every message goes to Meta.
+Both protocols fan out per destination from the sender's own host — one
+fmsg connection per recipient domain, one SMTP transaction per provider —
+so this is a like-for-like comparison of federation cost, and fmsg's
+compact framing wins it everywhere: roughly **3× cheaper** across a
+multi-domain conversation. WhatsApp has no notion of domains — every
+message goes to Meta.
 
 ## Capability differences at a glance
 
 | capability | fmsg | email | whatsapp |
 |---|---|---|---|
-| multiple recipients, one message | native; one transfer per domain | native (To/Cc); relay/server fan-out | groups only |
+| multiple recipients, one message | native; one transfer per domain | native (To/Cc); one transaction per provider | groups only |
 | add participant to a sent message | native, header-only | full re-send (forward) | not supported, no history |
 | branching threads | native DAG (32-byte parent ref) | threading headers + re-quoted history | flat chat, quote metadata |
-| attachments | raw binary | base64 (+33%) | encrypted upload; images recompressed; dedup |
-| federation | any domain, direct host-to-host | any domain, via MX/relays | single closed operator |
+| attachments | raw binary | base64 (+33% encoding) | encrypted upload; images recompressed; dedup |
+| transport security | TLS 1.3 required, encrypted from the first byte | opportunistic STARTTLS — preamble in clear, downgradeable unless MTA-STS/DANE | TLS + end-to-end encryption (Signal protocol) |
+| federation | any domain, direct host-to-host | any domain via MX — but big providers gate senders on PTR/SPF/DKIM reputation | single closed operator |
 
 ## Caveats, honestly
 
-Byte counts proved highly stable across repetitions on every system;
-timings cross the real internet and third-party infrastructure and are
-indicative only. fmsg numbers include its challenge-response verification
-(a second TLS connection on first contact per thread, under the default
-`HAS_NOT_PARTICIPATED` mode). WhatsApp is a closed platform: only
-client↔server traffic is measurable, automation used whatsapp-web.js
-(against WhatsApp's ToS — tiny volumes, human-like pacing), and extra
-"participants" are a group with one real second account. Email's Outlook
-participant runs via Microsoft Graph; its Gmail participant via the Gmail
-API; both reply with standard threading headers and full quoted history,
-as real clients do. Every scenario, command, and software version needed
-to replicate is in the repo.
+Byte counts proved highly stable across runs on every system; timings
+cross the real internet and third-party infrastructure and are indicative
+only. fmsg numbers include its challenge-response verification (a second
+TLS connection on first contact per thread, under the default
+`HAS_NOT_PARTICIPATED` mode) and reflect TLS session resumption between
+hosts that have communicated within the ticket lifetime. Email's
+100-message point is pending a reverse-DNS fix at the ISP — itself a
+finding about what direct SMTP federation demands of a self-hosted
+sender. WhatsApp is a closed platform: only client↔server traffic is
+measurable, automation used whatsapp-web.js (against WhatsApp's ToS —
+tiny volumes, human-like pacing), extra "participants" are a group with
+one real second account, and unlike the other two systems it is
+end-to-end encrypted. Email's Outlook participant runs via Microsoft
+Graph, its Gmail participant via the Gmail API; both reply with standard
+threading headers and full quoted history, as real clients do. Every
+scenario, command, and software version needed to replicate is in the
+repo.
 
 Full tables, figures, per-repetition data and retained packet captures:
 [fmsg-bench](https://github.com/markmnl/fmsg-bench).
