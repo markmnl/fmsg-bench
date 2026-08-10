@@ -8,7 +8,8 @@
 #   system      fmsg | email | whatsapp  (driver in drivers/<system>/)
 #   scenario    ids from scenarios/scenarios.tsv; default: all "core"
 #               rows that list the system in their systems column
-#   --reps N    repetitions per scenario (default 5)
+#   --reps N    repetitions per scenario (default 1 — byte counts are
+#               stable across runs; raise for timing spread)
 #
 # Per repetition: start capture -> run scenario via the system driver
 # -> stop capture -> extract metrics into results/results.csv.
@@ -18,8 +19,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 source "$SCRIPT_DIR/lib/capture.sh"
+source "$SCRIPT_DIR/lib/dns-pin.sh"
 
-REPS=5
+REPS=1
 SYSTEM=""
 REQUESTED=()
 

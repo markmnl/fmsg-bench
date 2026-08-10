@@ -33,9 +33,9 @@ SCENARIO_ORDER = ["m1p2", "m2p2", "m3p2", "m4p2", "m5p2",
                   "m1p2a10k", "m1p2a1m", "m1p5", "m1p5a10k", "m1p5a1m",
                   "m5p4", "m1p2-fwd", "m1p2a1m-fwd", "m3p2-br",
                   "m1p2ascr", "m1p2aimg", "m1p2adoc", "m1p3", "m1p3x",
-                  "m10p2", "m20p2", "m200p2", "m10p3x", "m10p4x"]
+                  "m10p2", "m20p2", "m100p2", "m200p2", "m10p3x", "m10p4x"]
 GROWTH_SERIES = [("m1p2", 1), ("m2p2", 2), ("m3p2", 3), ("m4p2", 4), ("m5p2", 5),
-                 ("m10p2", 10), ("m20p2", 20), ("m200p2", 200)]
+                 ("m10p2", 10), ("m20p2", 20), ("m100p2", 100), ("m200p2", 200)]
 
 
 def load():
