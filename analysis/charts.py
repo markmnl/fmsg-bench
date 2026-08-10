@@ -60,10 +60,13 @@ def style_axes(ax):
 
 
 def human_bytes(n, _pos=None):
+    def fmt(v):
+        s = f"{v:.1f}".rstrip("0").rstrip(".")
+        return s
     if n >= 1_000_000:
-        return f"{n / 1_000_000:.0f} MB"
+        return f"{fmt(n / 1_000_000)} MB"
     if n >= 1_000:
-        return f"{n / 1_000:.0f} kB"
+        return f"{fmt(n / 1_000)} kB"
     return f"{n:.0f} B"
 
 
@@ -128,11 +131,7 @@ def fig_conversation_growth(data, systems):
     ax.set_xlabel("messages exchanged (each a reply to the previous)",
                   fontsize=9, color=SECONDARY)
     ax.set_ylabel("cumulative bytes on the wire", fontsize=9, color=SECONDARY)
-    # Both axes log: the series spans 1..200 messages and kB..MB.
-    ax.set_xscale("log")
-    ax.set_xticks([1, 2, 3, 5, 10, 20, 50, 100, 200])
-    ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
-    ax.set_yscale("log")
+    ax.set_xticks([1, 5, 10, 20, 50, 100, 200])
     ax.yaxis.set_major_formatter(FuncFormatter(human_bytes))
     ax.grid(axis="y", color=GRID, linewidth=0.7, zorder=0)
     ax.set_title("Conversation cost growth", fontsize=11, color=INK, loc="left")
