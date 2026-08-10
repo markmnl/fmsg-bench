@@ -121,15 +121,19 @@ EMAIL_RELAY_PORT="${BENCH_EMAIL_RELAY_PORT:-}"
 
 driver_capture_spec() {
   CAPTURE_IFACE="ssh:$EMAIL_SSH_HOST:$EMAIL_WAN_IFACE"
-  CAPTURE_FILTER="tcp port 25"
-  [ -n "$EMAIL_RELAY_PORT" ] && CAPTURE_FILTER="tcp port 25 or tcp port $EMAIL_RELAY_PORT"
+  if [ -n "$EMAIL_RELAY_PORT" ]; then
+    CAPTURE_FILTER="tcp port 25 or tcp port $EMAIL_RELAY_PORT"
+  else
+    CAPTURE_FILTER="tcp port 25"
+  fi
 }
 
 driver_extract_args() {
-  local args="--port 25 --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
-  [ -n "$EMAIL_RELAY_PORT" ] \
-    && args="--port 25 --port $EMAIL_RELAY_PORT --keep-remote-port $EMAIL_RELAY_PORT --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
-  echo "$args"
+  if [ -n "$EMAIL_RELAY_PORT" ]; then
+    echo "--port 25 --port $EMAIL_RELAY_PORT --keep-remote-port $EMAIL_RELAY_PORT --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
+  else
+    echo "--port 25 --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
+  fi
 }
 
 # Cool-down between reps so postfix's SMTP connection cache expires and
