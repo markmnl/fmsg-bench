@@ -15,7 +15,7 @@ m1p2a1m-fwd	1	2	attach-1MiB.bin	fwd	core	fmsg,email	whatsapp: N/A — true forwa
 m3p2-br	3	2	-	br	core	fmsg,email,whatsapp	whatsapp: quoted replies, flat thread semantics
 m10p2	10	2	-	-	extended	fmsg,email,whatsapp	per-message growth analysis
 m20p2	20	2	-	-	extended	fmsg,email,whatsapp	per-message growth analysis
-m200p2	200	2	-	-	extended	fmsg,email,whatsapp	per-message growth analysis, long-thread stress
+m100p2	100	2	-	-	extended	fmsg,email,whatsapp	per-message growth analysis, long-thread stress
 m10p3x	10	3	-	x	extended	fmsg,email	recipients on two different domains; whatsapp N/A (no cross-domain concept)
 m1p2ascr	1	2	real-screenshot.png	-	extended	fmsg,email,whatsapp	realistic attachment: screenshot PNG ~336 kB
 m1p2aimg	1	2	real-photo.jpg	-	extended	fmsg,email,whatsapp	realistic attachment: photo JPG ~1.0 MB; whatsapp sent as image (native pipeline may recompress)
