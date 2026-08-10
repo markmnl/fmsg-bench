@@ -63,7 +63,8 @@ driver_init() {
   local v
   v="$(sed -n 's/^BENCH_EMAIL_SSH_HOST=//p' "$env_file")" && [ -n "$v" ] && EMAIL_SSH_HOST="$v"
   v="$(sed -n 's/^BENCH_EMAIL_WAN_IFACE=//p' "$env_file")" && [ -n "$v" ] && EMAIL_WAN_IFACE="$v"
-  v="$(sed -n 's/^BENCH_EMAIL_RELAY_PORT=//p' "$env_file")" && [ -n "$v" ] && EMAIL_RELAY_PORT="$v"
+  v="$(sed -n 's/^BENCH_EMAIL_RELAY_PORT=//p' "$env_file")"
+  if [ -n "$v" ]; then EMAIL_RELAY_PORT="$v"; fi
 
   [ -f "$HOME/.config/fmsg-bench/gmail-token.json" ] \
     || fail "no Gmail token — run: PYTHONPATH=$EMAIL_DIR python3 $EMAIL_DIR/gmail_oauth_bootstrap.py"
