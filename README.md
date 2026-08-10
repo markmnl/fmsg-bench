@@ -24,7 +24,8 @@ Per-system measurement points:
 
 | System | What is captured | Where |
 |---|---|---|
-| fmsg | host-to-host fmsg protocol, TCP 4930 | bridge of the two-stack container lab |
+| fmsg | host-to-host fmsg protocol, TCP 4930, between two real hosts on opposite sides of the world | interface of the local fmsg host, filtered to the remote host's IPs |
+| fmsg-lab | the same protocol between two containerised stacks (replicable) | bridge of the two-stack container lab |
 | email | host-to-host SMTP, TCP 25, mailcow ↔ Gmail | WAN interface of the mailcow host |
 | whatsapp | client ↔ Meta TLS traffic (no host-to-host wire exists) | dedicated bridge of the bot container |
 
@@ -51,12 +52,16 @@ reported separately per conversation).
 
 ```sh
 ./scenarios/gen-payloads.sh            # one-time: create payload files
-./drivers/fmsg/lab-up.sh               # start the two-domain container lab
+./drivers/fmsg-lab/lab-up.sh           # start the two-domain container lab
 ./versions.sh                          # record software versions
-./bench.sh fmsg m1p2 m1p2a10k          # run scenarios (5 reps each)
-./bench.sh fmsg                        # ... or the whole core matrix
-./drivers/fmsg/lab-down.sh             # tear down
+./bench.sh fmsg-lab m1p2 m1p2a10k      # run scenarios (5 reps each)
+./bench.sh fmsg-lab                    # ... or the whole core matrix
+./drivers/fmsg-lab/lab-down.sh         # tear down
 ```
+
+The `fmsg` system instead targets two real fmsg hosts; configure
+participants, webapi endpoints, API keys and the capture host in
+`~/.config/fmsg-bench/fmsg.env` (see `drivers/fmsg/driver.sh`).
 
 Results append to `results/results.csv`; raw pcaps and per-conversation
 JSON live under `results/pcaps/<system>/<scenario>/`.

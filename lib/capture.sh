@@ -66,7 +66,8 @@ start_capture() {
   if [[ "$iface" == ssh:* ]]; then
     CAPTURE_SSH_HOST="$(cut -d: -f2 <<<"$iface")"
     CAPTURE_SSH_IFACE="$(cut -d: -f3 <<<"$iface")"
-    ssh -o BatchMode=yes "$CAPTURE_SSH_HOST" \
+    CAPTURE_SSH_FILTER="$filter"
+    ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$CAPTURE_SSH_HOST" \
       "sudo -n tcpdump -i $CAPTURE_SSH_IFACE -s 0 -U -w - $filter" \
       > "$pcap" 2>"$pcap.tcpdump.log" &
   elif [[ "$iface" == rootless:* ]]; then
@@ -87,9 +88,10 @@ start_capture() {
   fi
   CAPTURE_PID=$!
 
-  # Wait for tcpdump to actually be capturing before the scenario starts.
+  # Wait for tcpdump to actually be capturing before the scenario starts
+  # (remote ssh+sudo startup can take several seconds under load).
   local i
-  for i in $(seq 1 50); do
+  for i in $(seq 1 200); do
     [ -s "$pcap" ] && break
     if ! kill -0 "$CAPTURE_PID" 2>/dev/null; then
       echo "ERROR: tcpdump exited early:" >&2
@@ -98,14 +100,21 @@ start_capture() {
     fi
     sleep 0.1
   done
+  if [ ! -s "$pcap" ]; then
+    echo "ERROR: capture failed to start within 20s (no pcap header)" >&2
+    kill "$CAPTURE_PID" 2>/dev/null || true
+    return 1
+  fi
 }
 
 stop_capture() {
   [ -n "$CAPTURE_PID" ] || return 0
 
   if [ -n "$CAPTURE_SSH_HOST" ]; then
-    ssh -o BatchMode=yes "$CAPTURE_SSH_HOST" \
-      "sudo -n pkill -INT -f 'tcpdump -i $CAPTURE_SSH_IFACE'" 2>/dev/null || true
+    # Match the full command incl. filter so concurrent captures on the
+    # same remote interface (different campaigns) don't kill each other.
+    ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$CAPTURE_SSH_HOST" \
+      "sudo -n pkill -INT -f 'tcpdump -i $CAPTURE_SSH_IFACE -s 0 -U -w - $CAPTURE_SSH_FILTER'" 2>/dev/null || true
   elif [ "$CAPTURE_ROOTLESS" = "true" ]; then
     # Signal the tcpdump child directly: SIGINT to the podman-unshare
     # wrapper may not propagate. (-U packet-buffering means nothing is

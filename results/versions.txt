@@ -1,14 +1,14 @@
-recorded: 2026-08-09T10:31:17Z
+recorded: 2026-08-10T00:47:46Z
 host: Linux 7.1.4-204.fc44.x86_64 x86_64 GNU/Linux
 
 ## workspace repos
 fmsg-spec: d8e9446 (2026-08-09)
-fmsgd: b6a9d2a (2026-08-09)
+fmsgd: 59cb7eb (2026-08-09)
 fmsg-webapi: 9a5451e (2026-08-05)
 fmsgid: 5a74176 (2026-08-03)
 fmsg-cli: f450ba5 (2026-08-05)
-fmsg-docker: 29bc006 (2026-08-05)
-fmsg-bench: (not a git checkout)
+fmsg-docker: ce2ec75 (2026-08-10)
+fmsg-bench: 1cb1514 (2026-08-09)
 
 ## tools
 tcpdump version 4.99.6

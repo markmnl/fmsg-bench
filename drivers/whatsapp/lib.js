@@ -7,12 +7,39 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const BODY_SIZE = 120;
 
-// "<scenario> r<rep> m<n> T<total>" padded with '.' to exactly BODY_SIZE
-// bytes — same size/uniqueness contract as the other systems' drivers.
+// Mirrors BODY_CORPUS in lib/common.sh — keep the two in sync.
+const BODY_CORPUS = [
+  'Hey, are we still on for coffee tomorrow morning before the standup?',
+  'Just landed. The flight was delayed two hours but the sunset over the wing almost made up for it.',
+  'Can you send me the notes from yesterday? I want to double-check the figures before the review.',
+  'The garden is finally coming together. The tomatoes survived the frost after all.',
+  'I tried that recipe you mentioned and somehow burnt the rice twice. Teach me your ways.',
+  'Meeting moved to three. Same room, bring the printouts if you can.',
+  'Saw a kingfisher by the river this morning. First one in years around here.',
+  'The car is making that noise again. Booking it in for Thursday unless you need it.',
+  'Finished the book you lent me. The ending was not what I expected at all.',
+  'Rain forecast all weekend, so the hike is off. Movie marathon instead?',
+  'Grandad says thanks for the photos. He printed one and put it on the mantel.',
+  'The quote came in higher than expected. I think we should get a second opinion.',
+  'New neighbours moved in next door. They have a dog that already likes me more than you do.',
+  'Power was out for an hour tonight. Candles, cards, and terrible ghost stories.',
+  'I fixed the leak under the sink. Only flooded the cupboard a little bit this time.',
+  'Tickets go on sale Friday at nine sharp. Set an alarm, they sold out fast last year.',
+];
+
+// "<scenario> r<rep> m<n> T<total>" followed by natural-language text,
+// cut to exactly BODY_SIZE bytes — same size/uniqueness contract as the
+// other systems' drivers.
 function msgBody(scenario, rep, n, total) {
   const tag = `${scenario} r${rep} m${n} T${total}`;
   if (tag.length > BODY_SIZE) throw new Error(`tag too long: ${tag}`);
-  return tag + '.'.repeat(BODY_SIZE - tag.length);
+  let body = tag;
+  let i = (n - 1) % BODY_CORPUS.length;
+  while (body.length < BODY_SIZE) {
+    body += ' ' + BODY_CORPUS[i];
+    i = (i + 1) % BODY_CORPUS.length;
+  }
+  return body.slice(0, BODY_SIZE);
 }
 
 // Parse a bench body back into its parts; null if not a bench message.

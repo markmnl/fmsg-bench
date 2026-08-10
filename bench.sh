@@ -101,6 +101,12 @@ for row in "${selected_rows[@]}"; do
   [ -n "$attach" ] || attach="-"
 
   for rep in $(seq 1 "$REPS"); do
+    # Additive capture: a repetition that already has a results row is
+    # never redone — delete its row (and pcap) to re-measure it.
+    if [ -f "$RESULTS_CSV" ] && grep -q "^$SYSTEM,$id,$rep," "$RESULTS_CSV"; then
+      log "$SYSTEM/$id rep $rep/$REPS — already recorded, skipping"
+      continue
+    fi
     log "$SYSTEM/$id rep $rep/$REPS"
     pcap="$RESULTS_DIR/pcaps/$SYSTEM/$id/rep${rep}.pcap"
 
@@ -136,11 +142,13 @@ for row in "${selected_rows[@]}"; do
 EOF
 
     # shellcheck disable=SC2086
-    python3 "$SCRIPT_DIR/capture/extract.py" "$pcap" \
+    if ! python3 "$SCRIPT_DIR/capture/extract.py" "$pcap" \
       --csv "$RESULTS_CSV" \
       --system "$SYSTEM" --scenario "$id" --rep "$rep" \
       --notes "$notes" \
-      $EXTRACT_ARGS
+      $EXTRACT_ARGS; then
+      echo "FAILED: $SYSTEM/$id rep $rep extraction (pcap kept at $pcap)" | tee -a "$RESULTS_DIR/failures.log" >&2
+    fi
 
     # Optional driver hook, e.g. a cool-down so per-rep connections are
     # independent (SMTP connection caching would otherwise let one rep

@@ -32,10 +32,13 @@ def main() -> int:
     ap.add_argument("--body-file", required=True)
     ap.add_argument("--attach")
     ap.add_argument("--reply-json")
+    ap.add_argument("--account", type=int, default=1,
+                    help="local persona: 1 -> BENCH_LOCAL_*, 2 -> BENCH_LOCAL2_*")
     args = ap.parse_args()
 
     env = load_env()
-    local = env["BENCH_LOCAL_ADDR"]
+    prefix = "BENCH_LOCAL_" if args.account == 1 else f"BENCH_LOCAL{args.account}_"
+    local = env[prefix + "ADDR"]
     port = int(env.get("BENCH_TUNNEL_SMTP_PORT", "15870"))
 
     with open(args.body_file) as f:
@@ -73,7 +76,7 @@ def main() -> int:
     s.ehlo()
     s.starttls(context=ctx)
     s.ehlo()
-    s.login(local, env["BENCH_LOCAL_PASS"])
+    s.login(local, env[prefix + "PASS"])
     s.send_message(msg)
     s.quit()
 

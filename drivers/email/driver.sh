@@ -28,6 +28,9 @@ export BENCH_TUNNEL_IMAP_PORT="$TUNNEL_IMAP_PORT"
 
 GOOGLE_CIDR_ARGS=""
 REMOTE_BASE=""
+LOCAL_BASE=""
+LOCAL2_BASE=""
+OUTLOOK_BASE=""
 
 epy() {  # run one of this driver's python tools
   local tool="$1"
@@ -46,6 +49,9 @@ driver_init() {
   [ -f "$env_file" ] || fail "missing $env_file"
   REMOTE_BASE="$(sed -n 's/^BENCH_REMOTE_ADDR=//p' "$env_file")"
   [ -n "$REMOTE_BASE" ] || fail "BENCH_REMOTE_ADDR not set in $env_file"
+  LOCAL_BASE="$(sed -n 's/^BENCH_LOCAL_ADDR=//p' "$env_file")"
+  LOCAL2_BASE="$(sed -n 's/^BENCH_LOCAL2_ADDR=//p' "$env_file")"
+  OUTLOOK_BASE="$(sed -n 's/^BENCH_OUTLOOK_ADDR=//p' "$env_file")"
 
   # Deployment-specific host/iface live in the (uncommitted) env file so
   # the repo stays free of personal infrastructure details.
@@ -59,19 +65,19 @@ driver_init() {
   # SSH tunnel for submission + IMAP (idempotent).
   if ! ss -tln 2>/dev/null | grep -q ":$TUNNEL_SMTP_PORT "; then
     log "Starting SSH tunnel to $EMAIL_SSH_HOST..."
-    ssh -o BatchMode=yes -f -N \
+    ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -f -N \
       -L "$TUNNEL_SMTP_PORT:localhost:587" \
       -L "$TUNNEL_IMAP_PORT:localhost:993" "$EMAIL_SSH_HOST"
   fi
 
   # Remote capture prerequisites (read-only on the mail host).
-  ssh -o BatchMode=yes "$EMAIL_SSH_HOST" 'sudo -n tcpdump --version >/dev/null' \
+  ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$EMAIL_SSH_HOST" 'sudo -n tcpdump --version >/dev/null' \
     || fail "passwordless sudo tcpdump unavailable on $EMAIL_SSH_HOST"
 
   # The mail host's own IP: passed to extract.py as the authoritative
   # local side (a rep that catches a connection mid-stream has no SYN to
   # infer it from).
-  EMAIL_LOCAL_IP=$(ssh -o BatchMode=yes "$EMAIL_SSH_HOST" \
+  EMAIL_LOCAL_IP=$(ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$EMAIL_SSH_HOST" \
     "ip -4 -o addr show $EMAIL_WAN_IFACE" | awk '{print $4}' | cut -d/ -f1 | head -1)
   [ -n "$EMAIL_LOCAL_IP" ] || fail "could not determine $EMAIL_SSH_HOST's IP on $EMAIL_WAN_IFACE"
 
@@ -86,7 +92,11 @@ driver_init() {
     dig +tcp +short TXT "$b.google.com" @8.8.8.8 2>/dev/null
   done | grep -o 'ip[46]:[^ "]*' | sed 's/^ip[46]://')
   [ -n "$blocks" ] || blocks="64.233.160.0/19 66.102.0.0/20 66.249.80.0/20 72.14.192.0/18 74.125.0.0/16 108.177.8.0/21 173.194.0.0/16 209.85.128.0/17 216.58.192.0/19 216.239.32.0/19 172.217.0.0/16 142.250.0.0/15 2607:f8b0:4000::/36 2800:3f0:4000::/36 2a00:1450:4000::/36 2c0f:fb50:4000::/36"
-  for cidr in $blocks; do
+  local ms_blocks
+  ms_blocks=$(dig +tcp +short TXT spf.protection.outlook.com @8.8.8.8 2>/dev/null \
+    | grep -o 'ip[46]:[^ "]*' | sed 's/^ip[46]://')
+  [ -n "$ms_blocks" ] || ms_blocks="40.92.0.0/15 40.107.0.0/16 52.100.0.0/14 104.47.0.0/17 2a01:111:f400::/48 2a01:111:f403::/49"
+  for cidr in $blocks $ms_blocks; do
     GOOGLE_CIDR_ARGS="$GOOGLE_CIDR_ARGS --remote-cidr $cidr"
   done
 }
@@ -109,9 +119,15 @@ driver_extract_args() {
 
 # Cool-down between reps so postfix's SMTP connection cache expires and
 # every rep negotiates its own connection (comparable, self-contained
-# captures).
+# captures). Also re-establishes the SSH tunnel if it died mid-campaign.
 driver_rep_gap() {
   sleep "${BENCH_EMAIL_REP_GAP:-10}"
+  if ! ss -tln 2>/dev/null | grep -q ":$TUNNEL_SMTP_PORT "; then
+    log "SSH tunnel to $EMAIL_SSH_HOST is down — re-establishing..."
+    ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -f -N \
+      -L "$TUNNEL_SMTP_PORT:localhost:587" \
+      -L "$TUNNEL_IMAP_PORT:localhost:993" "$EMAIL_SSH_HOST" || true
+  fi
 }
 
 driver_run_scenario() {
@@ -126,23 +142,34 @@ driver_run_scenario() {
   # shellcheck disable=SC2064
   trap "rm -rf '$rep_tmp'" RETURN
 
-  # Remote recipients for the first message: base account + plus-aliases.
+  # Recipients for the first message: for cross-domain (x) scenarios the
+  # third participant is a second local-side mailbox on its own domain;
+  # otherwise extra participants are plus-aliases of the remote account.
   local first_to=(--to "$REMOTE_BASE")
   local i
-  for i in $(seq 3 "$participants"); do
-    first_to+=(--to "$(remote_alias "$i")")
-  done
+  if [ "$modifier" = "x" ]; then
+    [ -n "$OUTLOOK_BASE" ] || { echo "ERROR: BENCH_OUTLOOK_ADDR not configured for $scenario" >&2; return 1; }
+    first_to+=(--to "$OUTLOOK_BASE")
+    for i in $(seq 4 "$participants"); do
+      first_to+=(--to "$(remote_alias "$i")")
+    done
+  else
+    for i in $(seq 3 "$participants"); do
+      first_to+=(--to "$(remote_alias "$i")")
+    done
+  fi
 
   local n sender prev_sender="" body_file out
   local root_gmail_id="" last_gmail_sent="" last_remote_json="$rep_tmp/last_remote.json"
 
   for n in $(seq 1 "$messages"); do
-    if [ "$n" -eq 1 ]; then
+    local sender_idx=$(( (n - 1) % participants + 1 ))
+    [ "$n" -eq 1 ] && sender_idx=1
+    [ "$modifier" = "br" ] && [ "$n" -gt 1 ] && sender_idx=2
+    if [ "$sender_idx" -eq 1 ]; then
       sender=local
-    elif [ "$modifier" = "br" ]; then
-      sender=remote
-    elif [ $(( (n - 1) % participants )) -eq 0 ]; then
-      sender=local
+    elif [ "$modifier" = "x" ] && [ "$sender_idx" -eq 3 ]; then
+      sender=outlook     # third provider, its own domain
     else
       sender=remote
     fi
@@ -158,7 +185,9 @@ driver_run_scenario() {
           --body-file "$body_file" "${attach_args[@]}" >/dev/null || return 1
         echo "    [$scenario r$rep] m$n: [local] -> [remote x$((participants - 1))]"
       else
-        epy send.py --to "$REMOTE_BASE" --subject "Re: $tag fmsg-bench" \
+        local reply_to=(--to "$REMOTE_BASE")
+        [ "$modifier" = "x" ] && reply_to+=(--to "$OUTLOOK_BASE")
+        epy send.py "${reply_to[@]}" --subject "Re: $tag fmsg-bench" \
           --body-file "$body_file" --reply-json "$last_remote_json" >/dev/null || return 1
         echo "    [$scenario r$rep] m$n: [local] -> [remote] (reply)"
       fi
@@ -168,6 +197,11 @@ driver_run_scenario() {
         out=$(epy gmail_reply.py --tag "$tag" --wait-only --timeout "$EMAIL_TIMEOUT") || return 1
         [ -z "$root_gmail_id" ] && root_gmail_id=$(jq -r '.id' <<<"$out")
       fi
+    elif [ "$sender" = "outlook" ]; then
+      epy outlook_reply.py --tag "$tag" --reply-body-file "$body_file" --reply-all \
+        --timeout "$EMAIL_TIMEOUT" >/dev/null || return 1
+      echo "    [$scenario r$rep] m$n: [outlook] -> [remote]+[local] (reply)"
+      epy imap_wait.py --tag "$tag" --timeout "$EMAIL_TIMEOUT" > "$last_remote_json" || return 1
     else
       local reply_args=(--reply-body-file "$body_file" --timeout "$EMAIL_TIMEOUT")
       [ "$participants" -gt 2 ] && reply_args+=(--reply-all)

@@ -152,10 +152,21 @@ driver_run_scenario() {
     # retransmit. Written into the payloads dir, which is mounted
     # read-only into the bot container at /payloads.
     local size unique_name
-    size=$(stat -c%s "$PAYLOADS_DIR/$attach")
     unique_name=".wa-$scenario-r$rep-$attach"
     unique_host_file="$PAYLOADS_DIR/$unique_name"
-    head -c "$size" /dev/urandom > "$unique_host_file"
+    case "$attach" in
+      real-*)
+        # Realistic file: keep content, append a tiny random tail so the
+        # media hash is unique per rep (defeats server-side dedup while
+        # remaining a valid image/document).
+        cp "$PAYLOADS_DIR/$attach" "$unique_host_file"
+        head -c 16 /dev/urandom >> "$unique_host_file"
+        ;;
+      *)
+        size=$(stat -c%s "$PAYLOADS_DIR/$attach")
+        head -c "$size" /dev/urandom > "$unique_host_file"
+        ;;
+    esac
     attach_path="/payloads/$unique_name"
     # shellcheck disable=SC2064
     trap "rm -f '$unique_host_file'" RETURN
@@ -173,12 +184,17 @@ driver_run_scenario() {
 
     if [ "$sender" -eq 1 ]; then
       body="$(wa_body "$scenario" "$rep" "$n" "$messages")"
+      # Images go through WhatsApp's native image pipeline (realistic —
+      # it may recompress); everything else is sent as a document.
+      local as_doc=true
+      case "$attach" in *.png|*.jpg|*.jpeg) as_doc=false ;; esac
       local payload
       payload=$(jq -n --arg to "$chat" --arg body "$body" \
         --arg media "${attach_path:-}" --arg quote "${received_prefix:-}" \
+        --argjson asdoc "$as_doc" \
         --argjson first "$([ "$n" -eq 1 ] && echo true || echo false)" \
         '{to: $to, body: $body}
-         + (if ($media != "" and $first) then {mediaPath: $media, asDocument: true} else {} end)
+         + (if ($media != "" and $first) then {mediaPath: $media, asDocument: $asdoc} else {} end)
          + (if $quote != "" then {quotePrefix: $quote} else {} end)')
       wa_api POST /send "$payload" >/dev/null || return 1
       echo "    [$scenario r$rep] m$n: [local] -> [chat]"

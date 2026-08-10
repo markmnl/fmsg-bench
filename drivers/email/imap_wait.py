@@ -25,9 +25,12 @@ def main() -> int:
     ap.add_argument("--count", type=int, default=1)
     ap.add_argument("--timeout", type=float, default=300)
     ap.add_argument("--poll", type=float, default=1)
+    ap.add_argument("--account", type=int, default=1,
+                    help="local persona: 1 -> BENCH_LOCAL_*, 2 -> BENCH_LOCAL2_*")
     args = ap.parse_args()
 
     env = load_env()
+    acct = "BENCH_LOCAL_" if args.account == 1 else f"BENCH_LOCAL{args.account}_"
     port = int(env.get("BENCH_TUNNEL_IMAP_PORT", "19930"))
 
     ctx = ssl.create_default_context()
@@ -37,10 +40,22 @@ def main() -> int:
     matched = 0
     deadline = time.time() + args.timeout
     while time.time() < deadline and matched < args.count:
-        imap = imaplib.IMAP4_SSL("127.0.0.1", port, ssl_context=ctx)
-        imap.login(env["BENCH_LOCAL_ADDR"], env["BENCH_LOCAL_PASS"])
-        imap.select("INBOX")
-        typ, data = imap.search(None, "UNSEEN", "SUBJECT", f'"{args.tag}"')
+        try:
+            imap = imaplib.IMAP4_SSL("127.0.0.1", port, ssl_context=ctx)
+            imap.login(env[acct + "ADDR"], env[acct + "PASS"])
+            imap.select("INBOX")
+        except (OSError, imaplib.IMAP4.error) as e:
+            # Transient tunnel/connection failure — keep polling until
+            # the deadline rather than aborting the scenario.
+            print(f"imap transient error, retrying: {e}", file=sys.stderr)
+            time.sleep(max(args.poll, 2))
+            continue
+        try:
+            typ, data = imap.search(None, "UNSEEN", "SUBJECT", f'"{args.tag}"')
+        except (OSError, imaplib.IMAP4.error) as e:
+            print(f"imap transient error, retrying: {e}", file=sys.stderr)
+            time.sleep(max(args.poll, 2))
+            continue
         if typ == "OK" and data and data[0]:
             for num in data[0].split():
                 typ, fetched = imap.fetch(num, "(RFC822)")

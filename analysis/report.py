@@ -12,24 +12,33 @@ import re
 BENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(BENCH_ROOT, "results")
 
-SYSTEM_ORDER = ["fmsg", "email", "whatsapp"]
+SYSTEM_ORDER = ["fmsg", "fmsg-lab", "email", "whatsapp"]
 
 
 def describe(scenario: str) -> str:
     """Neutral user-action description generated from the ID grammar."""
-    m = re.match(r"m(\d+)p(\d+)(a10k|a1m)?(-fwd|-br)?$", scenario)
+    m = re.match(r"m(\d+)p(\d+)(x)?(a10k|a1m|ascr|aimg|adoc)?(-fwd|-br)?$", scenario)
     if not m:
         return scenario
-    msgs, parts, attach, mod = int(m.group(1)), int(m.group(2)), m.group(3), m.group(4)
+    msgs, parts = int(m.group(1)), int(m.group(2))
+    cross, attach, mod = m.group(3), m.group(4), m.group(5)
     bits = []
     if msgs == 1:
         bits.append(f"one message to {parts - 1} recipient{'s' if parts > 2 else ''}")
     else:
         bits.append(f"{msgs} messages between {parts} participants, each a reply to the previous")
+    if cross:
+        bits.append("recipients on two different domains")
     if attach == "a10k":
         bits.append("first message carries a 10 KiB attachment")
     if attach == "a1m":
         bits.append("first message carries a 1 MiB attachment")
+    if attach == "ascr":
+        bits.append("first message carries a realistic screenshot (PNG, ~336 kB)")
+    if attach == "aimg":
+        bits.append("first message carries a realistic photo (JPG, ~1.0 MB)")
+    if attach == "adoc":
+        bits.append("first message carries a realistic document (ODT, ~377 kB)")
     if mod == "-fwd":
         bits.append("then an additional participant is brought into the message")
     if mod == "-br":
@@ -95,11 +104,31 @@ def main():
             add(f"![{name}](charts/{name}.svg)")
     add("")
 
+    add("## Protocol capability differences")
+    add("")
+    add("Not every scenario maps onto every system — a '—' in the tables is often")
+    add("a capability gap, not a missing measurement:")
+    add("")
+    add("| capability | fmsg | email | whatsapp |")
+    add("|---|---|---|---|")
+    add("| multiple recipients on one message | native; one transfer per recipient *domain* | native (To/Cc); one transaction per destination server | not supported — nearest equivalent is a group chat |")
+    add("| bring a participant into an already-sent message | native (`add-to`): header-only, data never retransmitted | only by forwarding — the full message incl. attachments is re-sent | not supported; adding someone to a group shares no history |")
+    add("| branching conversations | native: any message can be replied to, forming a DAG (32-byte parent reference) | supported via threading headers; each reply re-quotes history | flat chat; quoted replies reference but do not branch |")
+    add("| binary attachments | raw binary on the wire | base64-encoded (+33%) inside MIME | encrypted media upload (server dedupes repeat content) |")
+    add("| reply context | 32-byte parent hash | full quoted history re-sent each reply | quote metadata only |")
+    add("")
     add("## Method notes & caveats")
     add("")
-    add("- **fmsg**: two full stacks (two domains) as containers on one machine;")
-    add("  capture on the shared bridge, TCP 4930. Includes the challenge-response")
-    add("  second connection (always on in the tested fmsgd). Replicable.")
+    add("- **fmsg**: two REAL production hosts on opposite sides of the world,")
+    add("  host-to-host fmsg (TCP 4930) captured at the local host and filtered to")
+    add("  the remote host's IPs. Challenge mode is the fmsgd default")
+    add("  (HAS_NOT_PARTICIPATED): only first-contact messages incur the")
+    add("  challenge-response second connection. TLS uses production certificate")
+    add("  chains. Timings cross the real internet — indicative, like email's.")
+    add("- **fmsg-lab**: the same protocol between two containerised stacks on one")
+    add("  machine (self-signed certs, challenge ALWAYS, LAN-free bridge) — the")
+    add("  fully replicable environment. Byte differences vs fmsg are certificate")
+    add("  chain size and challenge frequency.")
     add("- **email**: self-hosted mailcow ↔ Gmail over the public internet.")
     add("  Outbound leaves via a smarthost relay (port 2525) — typical for")
     add("  residential hosting where ISPs block direct port 25 — so the measured")
@@ -114,8 +143,9 @@ def main():
     add("  bridge. Automation via whatsapp-web.js (against WhatsApp ToS; tiny")
     add("  volumes, human-like pacing). Extra participants are aliases/groups of")
     add("  one benchmark account — see scenario notes.")
-    add("- Message bodies are 120 bytes each; attachments are incompressible")
-    add("  random bytes (regenerable from a fixed seed).")
+    add("- Message bodies are natural-language text cut to exactly 120 bytes each;")
+    add("  attachments are incompressible random bytes (regenerable from a fixed")
+    add("  seed; unique per repetition on WhatsApp, which dedupes repeat media).")
     add("- Byte counts are stable across runs; timings vary — treat every duration")
     add("  as indicative.")
     add("")
@@ -134,8 +164,9 @@ def main():
     add("")
     add("```sh")
     add("./scenarios/gen-payloads.sh")
-    add("./drivers/fmsg/lab-up.sh && ./bench.sh fmsg")
-    add("./bench.sh email        # needs mailcow + Gmail OAuth (see README)")
+    add("./bench.sh fmsg          # real hosts — needs ~/.config/fmsg-bench/fmsg.env")
+    add("./drivers/fmsg-lab/lab-up.sh && ./bench.sh fmsg-lab   # replicable lab")
+    add("./bench.sh email         # needs mailcow + Gmail OAuth (see README)")
     add("./drivers/whatsapp/baseline.sh && ./bench.sh whatsapp")
     add("python3 analysis/summarize.py && python3 analysis/charts.py && python3 analysis/report.py")
     add("```")

@@ -5,3 +5,4 @@ scenarios/payloads/*.bin
 __pycache__/
 results/campaign-*.log
 results/failures.log
+scenarios/payloads/real-*
