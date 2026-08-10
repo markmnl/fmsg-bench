@@ -96,9 +96,8 @@ def fig_bytes_by_scenario(data, systems):
     ax.set_yticks(range(len(scenarios)))
     ax.set_yticklabels(scenarios)
     ax.invert_yaxis()
-    ax.set_xscale("log")
     ax.xaxis.set_major_formatter(FuncFormatter(human_bytes))
-    ax.set_xlabel("total bytes on the wire (median of 5 reps, log scale)",
+    ax.set_xlabel("total bytes on the wire (median)",
                   fontsize=9, color=SECONDARY)
     ax.grid(axis="x", color=GRID, linewidth=0.7, zorder=0)
     ax.set_title("Bytes over the wire per scenario", fontsize=11,
@@ -167,7 +166,6 @@ def fig_fwd_cost(data, systems):
     ax.set_yticks(ys)
     ax.set_yticklabels(names)
     ax.invert_yaxis()
-    ax.set_xscale("log")
     ax.xaxis.set_major_formatter(FuncFormatter(human_bytes))
     ax.grid(axis="x", color=GRID, linewidth=0.7, zorder=0)
     ax.set_title("Marginal wire cost of adding a participant\nto a sent 1 MiB-attachment message",
