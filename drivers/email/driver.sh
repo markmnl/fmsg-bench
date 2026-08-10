@@ -63,6 +63,7 @@ driver_init() {
   local v
   v="$(sed -n 's/^BENCH_EMAIL_SSH_HOST=//p' "$env_file")" && [ -n "$v" ] && EMAIL_SSH_HOST="$v"
   v="$(sed -n 's/^BENCH_EMAIL_WAN_IFACE=//p' "$env_file")" && [ -n "$v" ] && EMAIL_WAN_IFACE="$v"
+  v="$(sed -n 's/^BENCH_EMAIL_RELAY_PORT=//p' "$env_file")" && [ -n "$v" ] && EMAIL_RELAY_PORT="$v"
 
   [ -f "$HOME/.config/fmsg-bench/gmail-token.json" ] \
     || fail "no Gmail token — run: PYTHONPATH=$EMAIL_DIR python3 $EMAIL_DIR/gmail_oauth_bootstrap.py"
@@ -106,20 +107,28 @@ driver_init() {
   done
 }
 
-# Outbound mail from this mailcow relays via a smarthost on port 2525
-# (sender-dependent transport; residential ISPs block direct port 25),
-# so the measured outbound hop is mailcow->relay. Inbound is Gmail->
-# mailcow on port 25, kept only when the remote IP is in Google's
-# netblocks so unrelated production mail never enters the results.
-EMAIL_RELAY_PORT="${BENCH_EMAIL_RELAY_PORT:-2525}"
+# Outbound transport: direct SMTP on port 25 when the mail host can send
+# directly (rDNS/SPF/DKIM in place, port unblocked) — the sender's host
+# then performs the per-provider fan-out itself, all of it on the
+# measured wire. Where direct port 25 is unavailable, set
+# BENCH_EMAIL_RELAY_PORT (env or email.env) to the smarthost port
+# (e.g. 2525) and the measured outbound hop becomes mailcow->relay.
+# Inbound is provider->mailcow on port 25 either way, kept only when the
+# remote IP is in the providers' netblocks so unrelated production mail
+# never enters the results.
+EMAIL_RELAY_PORT="${BENCH_EMAIL_RELAY_PORT:-}"
 
 driver_capture_spec() {
   CAPTURE_IFACE="ssh:$EMAIL_SSH_HOST:$EMAIL_WAN_IFACE"
-  CAPTURE_FILTER="tcp port 25 or tcp port $EMAIL_RELAY_PORT"
+  CAPTURE_FILTER="tcp port 25"
+  [ -n "$EMAIL_RELAY_PORT" ] && CAPTURE_FILTER="tcp port 25 or tcp port $EMAIL_RELAY_PORT"
 }
 
 driver_extract_args() {
-  echo "--port 25 --port $EMAIL_RELAY_PORT --keep-remote-port $EMAIL_RELAY_PORT --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
+  local args="--port 25 --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
+  [ -n "$EMAIL_RELAY_PORT" ] \
+    && args="--port 25 --port $EMAIL_RELAY_PORT --keep-remote-port $EMAIL_RELAY_PORT --local $EMAIL_LOCAL_IP $GOOGLE_CIDR_ARGS"
+  echo "$args"
 }
 
 # Cool-down between reps so postfix's SMTP connection cache expires and

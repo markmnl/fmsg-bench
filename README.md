@@ -46,7 +46,7 @@ Per-system measurement points:
 |---|---|---|
 | fmsg | host-to-host fmsg protocol, TCP 4930, between real production hosts on three domains spanning the world | interface of the local fmsg host, filtered to the remote hosts' IPs |
 | fmsg-lab *(optional, not in published results)* | the same protocol between two containerised stacks on one machine | bridge of the two-stack container lab |
-| email | host-to-host SMTP: self-hosted mailcow ↔ Gmail ↔ Outlook (relay outbound on port 2525, inbound port 25 filtered to provider netblocks) | WAN interface of the mail host |
+| email | host-to-host SMTP: self-hosted mailcow ↔ Gmail ↔ Outlook, direct on port 25 both ways, filtered to provider netblocks (set `BENCH_EMAIL_RELAY_PORT` if outbound must ride a smarthost relay instead) | WAN interface of the mail host |
 | whatsapp | client ↔ Meta traffic, TCP+UDP, idle-baseline-subtracted (no host-to-host wire exists) | dedicated bridge of the bot container |
 
 Caveats (also in the report): every leg crosses the public internet so
