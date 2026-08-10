@@ -12,7 +12,7 @@ import re
 BENCH_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(BENCH_ROOT, "results")
 
-SYSTEM_ORDER = ["fmsg", "fmsg-lab", "email", "whatsapp"]
+SYSTEM_ORDER = ["fmsg", "email", "whatsapp"]
 
 
 def describe(scenario: str) -> str:
@@ -119,17 +119,16 @@ def main():
     add("")
     add("## Method notes & caveats")
     add("")
-    add("- **fmsg**: two REAL production hosts on opposite sides of the world,")
+    add("- **fmsg**: real production hosts on three domains spanning the world,")
     add("  host-to-host fmsg (TCP 4930) captured at the local host and filtered to")
     add("  the remote host's IPs. Challenge mode is the fmsgd default")
     add("  (HAS_NOT_PARTICIPATED): only first-contact messages incur the")
     add("  challenge-response second connection. TLS uses production certificate")
-    add("  chains. Timings cross the real internet — indicative, like email's.")
-    add("- **fmsg-lab**: the same protocol between two containerised stacks on one")
-    add("  machine (self-signed certs, challenge ALWAYS, LAN-free bridge) — the")
-    add("  fully replicable environment. Byte differences vs fmsg are certificate")
-    add("  chain size and challenge frequency.")
-    add("- **email**: self-hosted mailcow ↔ Gmail over the public internet.")
+    add("  chains with session resumption — connections after the first to a")
+    add("  given host resume and skip the certificate exchange. Timings cross")
+    add("  the real internet — indicative, like email's.")
+    add("- **email**: self-hosted mailcow ↔ Gmail (and, in cross-provider")
+    add("  scenarios, ↔ Outlook via Microsoft Graph) over the public internet.")
     add("  Outbound leaves via a smarthost relay (port 2525) — typical for")
     add("  residential hosting where ISPs block direct port 25 — so the measured")
     add("  outbound hop is mailcow→relay; inbound is Gmail→mailcow on port 25,")
@@ -146,8 +145,10 @@ def main():
     add("- Message bodies are natural-language text cut to exactly 120 bytes each;")
     add("  attachments are incompressible random bytes (regenerable from a fixed")
     add("  seed; unique per repetition on WhatsApp, which dedupes repeat media).")
-    add("- Byte counts are stable across runs; timings vary — treat every duration")
-    add("  as indicative.")
+    add("- Repetitions: fmsg and email run one repetition per scenario — their")
+    add("  byte counts are stable across runs; whatsapp runs five (medians")
+    add("  reported, idle baseline subtracted). Timings vary — treat every")
+    add("  duration as indicative.")
     add("")
 
     versions = os.path.join(RESULTS, "versions.txt")
@@ -165,7 +166,6 @@ def main():
     add("```sh")
     add("./scenarios/gen-payloads.sh")
     add("./bench.sh fmsg          # real hosts — needs ~/.config/fmsg-bench/fmsg.env")
-    add("./drivers/fmsg-lab/lab-up.sh && ./bench.sh fmsg-lab   # replicable lab")
     add("./bench.sh email         # needs mailcow + Gmail OAuth (see README)")
     add("./drivers/whatsapp/baseline.sh && ./bench.sh whatsapp")
     add("python3 analysis/summarize.py && python3 analysis/charts.py && python3 analysis/report.py")

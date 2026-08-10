@@ -17,7 +17,15 @@ mkdir -p "$RESULTS_DIR"
   for repo in fmsg-spec fmsgd fmsg-webapi fmsgid fmsg-cli fmsg-docker fmsg-bench; do
     dir="$WORKSPACE_ROOT/$repo"
     if [ -d "$dir/.git" ]; then
-      echo "$repo: $(git -C "$dir" rev-parse --short HEAD) ($(git -C "$dir" log -1 --format=%cs))"
+      sha="$(git -C "$dir" rev-parse --short HEAD)"
+      line="$repo: $sha ($(git -C "$dir" log -1 --format=%cs))"
+      # deployed hosts track origin/main; note it when the local checkout differs
+      git -C "$dir" fetch -q origin main 2>/dev/null || true
+      main_sha="$(git -C "$dir" rev-parse --short origin/main 2>/dev/null || true)"
+      if [ -n "$main_sha" ] && [ "$main_sha" != "$sha" ]; then
+        line="$line [origin/main: $main_sha]"
+      fi
+      echo "$line"
     elif [ -d "$dir" ]; then
       echo "$repo: (not a git checkout)"
     fi

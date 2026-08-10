@@ -4,8 +4,9 @@ Benchmark harness producing the numbers for the fmsg white paper's
 "Real World Comparison" section: bytes over the wire (including TLS
 framing) and time taken, for **fmsg** vs **email (SMTP)** vs
 **WhatsApp**, across a matrix of messaging scenarios. All three systems
-are measured over the real internet; a containerised fmsg lab provides a
-fully replicable baseline.
+are measured over the real internet. (A containerised two-domain fmsg
+lab is also included as a fully replicable environment, though the
+published results are all real-internet.)
 
 Results: [`results/report.md`](results/report.md) ·
 blog write-up: [`results/blog-summary.md`](results/blog-summary.md)
@@ -29,17 +30,18 @@ blog write-up: [`results/blog-summary.md`](results/blog-summary.md)
 - Scenario descriptions are neutral user actions; protocol behaviour
   differences are surfaced by the results analysis, not baked into the
   tests.
-- 5 repetitions per scenario (email: 1 — its byte counts are stable and
-  its turns are slow); analysis reports median, min, max. Repetitions
-  are **additive**: a rep already in `results.csv` is skipped on re-run,
-  so new scenarios extend the dataset without disturbing it.
+- Repetitions: fmsg and email run 1 per scenario (their byte counts are
+  stable across runs); WhatsApp runs 5 (analysis reports median, min,
+  max). Repetitions are **additive**: a rep already in `results.csv` is
+  skipped on re-run, so new scenarios extend the dataset without
+  disturbing it.
 
 Per-system measurement points:
 
 | System | What is captured | Where |
 |---|---|---|
 | fmsg | host-to-host fmsg protocol, TCP 4930, between real production hosts on three domains spanning the world | interface of the local fmsg host, filtered to the remote hosts' IPs |
-| fmsg-lab | the same protocol between two containerised stacks on one machine | bridge of the two-stack container lab |
+| fmsg-lab *(optional, not in published results)* | the same protocol between two containerised stacks on one machine | bridge of the two-stack container lab |
 | email | host-to-host SMTP: self-hosted mailcow ↔ Gmail ↔ Outlook (relay outbound on port 2525, inbound port 25 filtered to provider netblocks) | WAN interface of the mail host |
 | whatsapp | client ↔ Meta traffic, TCP+UDP, idle-baseline-subtracted (no host-to-host wire exists) | dedicated bridge of the bot container |
 
@@ -47,7 +49,9 @@ Caveats (also in the report): every leg crosses the public internet so
 timings are indicative, not replicable — byte counts are the stable,
 comparable metric. fmsg numbers include challenge-response verification
 under fmsgd's default `HAS_NOT_PARTICIPATED` mode (a second connection
-on first contact per thread). WhatsApp numbers are client-side;
+on first contact per thread) and reflect fmsgd's TLS session resumption
+(connections after the first to a given host skip the certificate
+exchange). WhatsApp numbers are client-side;
 automation uses whatsapp-web.js. Email replies are generated via the
 Gmail API / Microsoft Graph with standard threading headers and full
 quoted history, as real clients produce.
@@ -74,7 +78,7 @@ Replicable lab (no accounts needed beyond the sibling repos):
 ./scenarios/gen-payloads.sh            # one-time: create payload files
 ./drivers/fmsg-lab/lab-up.sh           # start the two-domain container lab
 ./versions.sh                          # record software versions
-./bench.sh fmsg-lab m1p2 m1p2a10k      # run scenarios (5 reps each)
+./bench.sh fmsg-lab m1p2 m1p2a10k      # run scenarios (default 5 reps; --reps N)
 ./bench.sh fmsg-lab                    # ... or the whole core matrix
 ./drivers/fmsg-lab/lab-down.sh         # tear down
 ```
