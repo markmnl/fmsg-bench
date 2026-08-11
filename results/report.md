@@ -9,61 +9,61 @@ median of the repetitions per scenario. Raw per-repetition data:
 
 | ID | Scenario (user action) | fmsg | email | whatsapp |
 |---|---|---|---|---|
-| m1p2 | one message to 1 recipient | 16.7 kB | 25.0 kB | 4.8 kB |
-| m2p2 | 2 messages between 2 participants, each a reply to the previous | 14.7 kB | 35.6 kB | 6.1 kB |
-| m3p2 | 3 messages between 2 participants, each a reply to the previous | 19.6 kB | 55.4 kB | 16.6 kB |
-| m4p2 | 4 messages between 2 participants, each a reply to the previous | 24.6 kB | 70.8 kB | 17.4 kB |
-| m5p2 | 5 messages between 2 participants, each a reply to the previous | 29.7 kB | 92.2 kB | 26.0 kB |
+| m1p2 | one message to 1 recipient | 9.6 kB | 25.0 kB | 4.8 kB |
+| m2p2 | 2 messages between 2 participants, each a reply to the previous | 14.3 kB | 35.6 kB | 6.1 kB |
+| m3p2 | 3 messages between 2 participants, each a reply to the previous | 19.5 kB | 55.4 kB | 16.6 kB |
+| m4p2 | 4 messages between 2 participants, each a reply to the previous | 24.5 kB | 70.8 kB | 17.4 kB |
+| m5p2 | 5 messages between 2 participants, each a reply to the previous | 29.3 kB | 92.2 kB | 26.0 kB |
 | m1p5 | one message to 4 recipients | — | 20.9 kB | 2.1 kB |
-| m3p2-br | 3 messages between 2 participants, each a reply to the previous; the final two messages are both replies to the first message | 19.6 kB | 49.8 kB | 13.9 kB |
+| m3p2-br | 3 messages between 2 participants, each a reply to the previous; the final two messages are both replies to the first message | 19.7 kB | 49.8 kB | 13.9 kB |
 | m5p4 | 5 messages between 4 participants, each a reply to the previous | — | 92.1 kB | 218.8 kB |
-| m10p2 | 10 messages between 2 participants, each a reply to the previous | 54.3 kB | 186.6 kB | 75.5 kB |
-| m20p2 | 20 messages between 2 participants, each a reply to the previous | 103.8 kB | 425.2 kB | 132.4 kB |
-| m1p2a10k | one message to 1 recipient; first message carries a 10 KiB attachment | 20.3 kB | 35.4 kB | 26.8 kB |
-| m1p2a1m | one message to 1 recipient; first message carries a 1 MiB attachment | 1.11 MB | 1.52 MB | 1.14 MB |
+| m10p2 | 10 messages between 2 participants, each a reply to the previous | 54.4 kB | 186.6 kB | 75.5 kB |
+| m20p2 | 20 messages between 2 participants, each a reply to the previous | 103.9 kB | 425.2 kB | 132.4 kB |
+| m1p2a10k | one message to 1 recipient; first message carries a 10 KiB attachment | 20.5 kB | 35.4 kB | 26.8 kB |
+| m1p2a1m | one message to 1 recipient; first message carries a 1 MiB attachment | 1.12 MB | 1.52 MB | 1.14 MB |
 | m1p5a10k | one message to 4 recipients; first message carries a 10 KiB attachment | — | 36.3 kB | 23.2 kB |
 | m1p5a1m | one message to 4 recipients; first message carries a 1 MiB attachment | — | 1.53 MB | 1.13 MB |
 | m200p2 | 200 messages between 2 participants, each a reply to the previous | 998.5 kB | — | 1.19 MB |
-| m1p2ascr | one message to 1 recipient; first message carries a realistic screenshot (PNG, ~336 kB) | 360.9 kB | 505.8 kB | 45.7 kB |
-| m1p2aimg | one message to 1 recipient; first message carries a realistic photo (JPG, ~1.0 MB) | 1.09 MB | 1.48 MB | 59.3 kB |
-| m1p2adoc | one message to 1 recipient; first message carries a realistic document (ODT, ~377 kB) | 404.3 kB | 565.8 kB | 418.6 kB |
-| m1p2-fwd | one message to 1 recipient; then an additional participant is brought into the message | 18.9 kB | 40.2 kB | — |
-| m1p2a1m-fwd | one message to 1 recipient; first message carries a 1 MiB attachment; then an additional participant is brought into the message | 1.13 MB | 3.05 MB | — |
-| m100p2 | 100 messages between 2 participants, each a reply to the previous | 500.9 kB | — | — |
-| m10p3x | 10 messages between 3 participants, each a reply to the previous; recipients on two different domains | 79.3 kB | 259.8 kB | — |
-| m1p3 | one message to 2 recipients | 9.6 kB | 20.3 kB | — |
-| m1p3x | one message to 2 recipients; recipients on two different domains | 19.4 kB | 35.1 kB | — |
-| m10p4x | 10 messages between 4 participants, each a reply to the previous; recipients on two different domains | 89.2 kB | 237.0 kB | — |
+| m1p2ascr | one message to 1 recipient; first message carries a realistic screenshot (PNG, ~336 kB) | 361.1 kB | 505.8 kB | 45.7 kB |
+| m1p2aimg | one message to 1 recipient; first message carries a realistic photo (JPG, ~1.0 MB) | 1.08 MB | 1.48 MB | 59.3 kB |
+| m1p2adoc | one message to 1 recipient; first message carries a realistic document (ODT, ~377 kB) | 416.7 kB | 565.8 kB | 418.6 kB |
+| m1p2-fwd | one message to 1 recipient; then an additional participant is brought into the message | 19.0 kB | 40.2 kB | — |
+| m1p2a1m-fwd | one message to 1 recipient; first message carries a 1 MiB attachment; then an additional participant is brought into the message | 1.12 MB | 3.05 MB | — |
+| m10p3x | 10 messages between 3 participants, each a reply to the previous; recipients on two different domains | 79.1 kB | 259.8 kB | — |
+| m1p3 | one message to 2 recipients | 9.7 kB | 20.3 kB | — |
+| m1p3x | one message to 2 recipients; recipients on two different domains | 19.2 kB | 35.1 kB | — |
+| m10p4x | 10 messages between 4 participants, each a reply to the previous; recipients on two different domains | 89.3 kB | 237.0 kB | — |
+| m100p2 | 100 messages between 2 participants, each a reply to the previous | 501.2 kB | — | — |
 
 ## Table 2 — transmission time (seconds, median)
 
 | ID | fmsg | email | whatsapp |
 |---|---|---|---|
-| m1p2 | 1.4575 | 3.0309 | 1.6954 |
-| m2p2 | 24.2097 | 21.5805 | 4.1779 |
-| m3p2 | 54.8652 | 22.0655 | 5.8974 |
-| m4p2 | 83.2047 | 33.0247 | 6.3253 |
-| m5p2 | 108.3593 | 39.1347 | 6.8419 |
+| m1p2 | 1.4218 | 3.0309 | 1.6954 |
+| m2p2 | 5.58 | 21.5805 | 4.1779 |
+| m3p2 | 8.3246 | 22.0655 | 5.8974 |
+| m4p2 | 12.4679 | 33.0247 | 6.3253 |
+| m5p2 | 15.0876 | 39.1347 | 6.8419 |
 | m1p5 | — | 3.3068 | 1.9718 |
-| m3p2-br | 42.4923 | 21.2794 | 6.8302 |
+| m3p2-br | 8.1239 | 21.2794 | 6.8302 |
 | m5p4 | — | 30.033 | 14.7419 |
-| m10p2 | 235.4771 | 77.5551 | 25.8924 |
-| m20p2 | 71.9418 | 125.5762 | 63.6502 |
-| m1p2a10k | 1.4203 | 2.9734 | 5.2004 |
-| m1p2a1m | 2.6077 | 10.1834 | 6.5225 |
+| m10p2 | 33.0627 | 77.5551 | 25.8924 |
+| m20p2 | 68.9416 | 125.5762 | 63.6502 |
+| m1p2a10k | 1.381 | 2.9734 | 5.2004 |
+| m1p2a1m | 2.521 | 10.1834 | 6.5225 |
 | m1p5a10k | — | 3.6363 | 5.2287 |
 | m1p5a1m | — | 11.1722 | 5.8949 |
 | m200p2 | 5319.4477 | — | 357.2406 |
-| m1p2ascr | 2.1983 | 5.1875 | 4.1428 |
-| m1p2aimg | 2.6205 | 9.8322 | 4.3586 |
-| m1p2adoc | 2.2335 | 6.1158 | 3.4754 |
-| m1p2-fwd | 14.1331 | 10.8075 | — |
-| m1p2a1m-fwd | 14.1694 | 26.8493 | — |
-| m100p2 | 346.4406 | — | — |
-| m10p3x | 95.8682 | 69.6266 | — |
-| m1p3 | 1.422 | 3.0951 | — |
-| m1p3x | 7.1103 | 5.1697 | — |
-| m10p4x | 92.8701 | 85.8401 | — |
+| m1p2ascr | 2.2252 | 5.1875 | 4.1428 |
+| m1p2aimg | 2.6557 | 9.8322 | 4.3586 |
+| m1p2adoc | 2.6367 | 6.1158 | 3.4754 |
+| m1p2-fwd | 3.2403 | 10.8075 | — |
+| m1p2a1m-fwd | 4.894 | 26.8493 | — |
+| m10p3x | 99.1835 | 69.6266 | — |
+| m1p3 | 1.3966 | 3.0951 | — |
+| m1p3x | 5.3897 | 5.1697 | — |
+| m10p4x | 103.6115 | 85.8401 | — |
+| m100p2 | 360.6928 | — | — |
 
 ## Figures
 
@@ -120,17 +120,17 @@ a capability gap, not a missing measurement:
 ## Appendix — software versions
 
 ```
-recorded: 2026-08-10T00:47:46Z
+recorded: 2026-08-10T23:49:24Z
 host: Linux 7.1.4-204.fc44.x86_64 x86_64 GNU/Linux
 
 ## workspace repos
-fmsg-spec: d8e9446 (2026-08-09)
-fmsgd: 59cb7eb (2026-08-09)
-fmsg-webapi: 9a5451e (2026-08-05)
+fmsg-spec: 49585f7 (2026-08-11) [origin/main: c2a5b18]
+fmsgd: 8a14a9f (2026-08-11) [origin/main: 5779f14]
+fmsg-webapi: 06634b4 (2026-08-10) [origin/main: 6ef5136]
 fmsgid: 5a74176 (2026-08-03)
-fmsg-cli: f450ba5 (2026-08-05)
-fmsg-docker: ce2ec75 (2026-08-10)
-fmsg-bench: 1cb1514 (2026-08-09)
+fmsg-cli: f450ba5 (2026-08-05) [origin/main: e4ff0ca]
+fmsg-docker: 1feebdb (2026-08-11)
+fmsg-bench: 9742160 (2026-08-11)
 
 ## tools
 tcpdump version 4.99.6

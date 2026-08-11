@@ -31,10 +31,10 @@ on port 25, as mail servers really exchange it.
 
 | messages exchanged | fmsg | email | whatsapp |
 |---|---|---|---|
-| 1 | 16.7 kB | 25.0 kB | 4.8 kB |
-| 5 | 29.7 kB | 92.2 kB | 26.0 kB |
-| 20 | 103.8 kB | 425.2 kB | 132.4 kB |
-| 100 | **500.9 kB** | —† | — |
+| 1 | 9.6 kB | 25.0 kB | 4.8 kB |
+| 5 | 29.3 kB | 92.2 kB | 26.0 kB |
+| 20 | 103.9 kB | 425.2 kB | 132.4 kB |
+| 100 | **501.2 kB** | —† | — |
 | 200 | **998.5 kB** | — | 1.19 MB |
 
 † not yet measured: Gmail rejects direct senders whose IP lacks a custom
@@ -51,18 +51,17 @@ quote the entire history each time, so its per-message cost *grows*: by
 message 20 it is paying over 20 kB per message and the conversation has
 cost **4× fmsg** — and that is with 120-byte messages; the gap widens
 with longer ones. Even a single message costs less on fmsg than email
-(16.7 kB vs 25.0 kB — and that fmsg figure is the worst case, first-ever
-contact between two hosts; between hosts that have spoken recently it
-drops to ~9.6 kB).
+(9.6 kB vs 25.0 kB; the first-ever contact between two hosts pays full
+TLS handshakes and costs ~7 kB more, once).
 
 ## Attachments
 
 | attachment | fmsg | email | whatsapp |
 |---|---|---|---|
-| 1 MiB (incompressible) | 1.11 MB | 1.52 MB | 1.14 MB |
+| 1 MiB (incompressible) | 1.12 MB | 1.52 MB | 1.14 MB |
 | screenshot, 336 kB PNG | 361 kB | 506 kB | 45.7 kB |
-| photo, 1.02 MB JPG | 1.09 MB | 1.48 MB | **59.3 kB** |
-| document, 377 kB ODT | 404 kB | 566 kB | 419 kB |
+| photo, 1.02 MB JPG | 1.08 MB | 1.48 MB | **59.3 kB** |
+| document, 377 kB ODT | 417 kB | 566 kB | 419 kB |
 
 fmsg sends raw binary: 5–7% of framing over the file itself. Email still
 base64-encodes everything inside MIME: **~45% over the raw file, on
@@ -76,24 +75,26 @@ file twice never uploads it again).
 
 | action | fmsg | email | whatsapp |
 |---|---|---|---|
-| add a participant to a sent 1 MiB message | **+26 kB** | +1.53 MB | not supported |
+| add a participant to a sent 1 MiB message | **+9.5 kB** | +1.53 MB | not supported |
 
 This is where protocol design diverges most. fmsg's `add-to` re-sends
 only a header; hosts that already hold the message answer "skip the
 data", so the attachment never travels again — the newcomer's host
 fetches what it lacks and everyone's thread is intact. Email can only
 *forward*: the entire MIME body, base64 attachment included, is
-re-transmitted — **~58× the bytes** here. WhatsApp has no equivalent at
-all: adding someone to a group shares no history with them.
+re-transmitted — **~160× the bytes** here, and the multiple grows with
+the attachment, while fmsg's add-to costs the same whether the message
+carried a byte or a gigabyte. WhatsApp has no equivalent at all: adding
+someone to a group shares no history with them.
 
 ## Recipients on multiple domains
 
 | scenario | fmsg | email |
 |---|---|---|
-| 1 message → 2 recipients (one remote domain) | 9.6 kB | 20.3 kB |
-| 1 message → 2 recipients, different domains | 19.4 kB | 35.1 kB |
-| 10-message conversation, 3 participants, 3 domains | 79.3 kB | 259.8 kB |
-| 10-message conversation, 4 participants, 3 domains | 89.2 kB | 237.0 kB |
+| 1 message → 2 recipients (one remote domain) | 9.7 kB | 20.3 kB |
+| 1 message → 2 recipients, different domains | 19.2 kB | 35.1 kB |
+| 10-message conversation, 3 participants, 3 domains | 79.1 kB | 259.8 kB |
+| 10-message conversation, 4 participants, 3 domains | 89.3 kB | 237.0 kB |
 
 Both protocols fan out per destination from the sender's own host — one
 fmsg connection per recipient domain, one SMTP transaction per provider —

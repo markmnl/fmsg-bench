@@ -140,16 +140,18 @@ def fig_conversation_growth(data, systems):
 
 
 def fig_fwd_cost(data, systems):
-    """Marginal cost of bringing a third participant into a message
-    carrying a 1 MiB attachment: fwd-scenario total minus base total."""
+    """Marginal cost of bringing a third participant into a sent message:
+    fwd-scenario total minus base total. Uses the text-message pair — the
+    deltas are far larger than capture noise there, unlike the 1 MiB pair
+    where upload ACK variance (~tens of kB) can swamp a small margin."""
     fig, ax = plt.subplots(figsize=(6, 2.6))
     fig.patch.set_facecolor(SURFACE)
     style_axes(ax)
 
     ys, xs, colors, names = [], [], [], []
     for i, sys_name in enumerate(systems):
-        base = data.get((sys_name, "m1p2a1m"))
-        fwd = data.get((sys_name, "m1p2a1m-fwd"))
+        base = data.get((sys_name, "m1p2"))
+        fwd = data.get((sys_name, "m1p2-fwd"))
         if not (base and fwd):
             continue
         delta = int(fwd["bytes_total_median"]) - int(base["bytes_total_median"])
@@ -168,7 +170,7 @@ def fig_fwd_cost(data, systems):
     ax.invert_yaxis()
     ax.xaxis.set_major_formatter(FuncFormatter(human_bytes))
     ax.grid(axis="x", color=GRID, linewidth=0.7, zorder=0)
-    ax.set_title("Marginal wire cost of adding a participant\nto a sent 1 MiB-attachment message",
+    ax.set_title("Marginal wire cost of adding a participant\nto an already-sent message",
                  fontsize=11, color=INK, loc="left")
     fig.tight_layout()
     return fig, "fwd-cost"
