@@ -85,24 +85,25 @@ def fig_attach_overhead(data, systems):
                 continue
             raw = ATTACH_RAW[sc][1]
             ys.append(j + (i - (n_sys - 1) / 2) * bar_h)
-            xs.append(100.0 * (t - raw) / raw)
+            xs.append(100.0 * t / raw)
         ax.barh(ys, xs, height=bar_h * 0.9, color=SYSTEM_COLOR[sys_name],
                 label=sys_name, zorder=3)
         for y, x in zip(ys, xs):
-            ax.annotate(f"{x:+.0f}%", (x, y),
-                        xytext=(5 if x >= 0 else -5, 0),
+            ax.annotate(f"{x:.0f}%", (x, y), xytext=(5, 0),
                         textcoords="offset points", va="center",
-                        ha="left" if x >= 0 else "right",
                         fontsize=8, color=SECONDARY)
 
-    ax.axvline(0, color=INK, linewidth=0.8, zorder=2)
+    ax.axvline(100, color=INK, linewidth=0.8, zorder=2)
+    ax.annotate("100% = the raw file's size", (100, -0.75), fontsize=8,
+                color=MUTED, ha="center", annotation_clip=False)
     ax.set_yticks(range(len(scenarios)))
     ax.set_yticklabels([ATTACH_RAW[sc][0] for sc in scenarios])
     ax.invert_yaxis()
-    ax.set_xlabel("wire bytes vs raw file size (negative = recompressed)",
+    ax.set_xlabel("bytes on the wire as % of the raw file "
+                  "(right of the line = overhead, left = recompressed)",
                   fontsize=9, color=SECONDARY)
     ax.grid(axis="x", color=GRID, linewidth=0.7, zorder=0)
-    ax.set_title("Attachment overhead over the raw file", fontsize=11,
+    ax.set_title("Attachment bytes relative to the raw file", fontsize=11,
                  color=INK, loc="left")
     ax.legend(frameon=False, fontsize=9, labelcolor=SECONDARY,
               loc="lower right")
