@@ -61,3 +61,4 @@ fmsg,m1p2adoc,1,2,416666,416666,416666,398720,17946,390428,2.6367,2.6367,2.6367,
 fmsg,m1p3,1,2,9654,9654,9654,4828,4826,6964,1.3966,1.3966,1.3966,two recipients: fmsg = remote domain + sender's own domain; email = two mailboxes at the same remote provider
 fmsg,m1p3x,1,4,19245,19245,19245,9635,9610,13907,5.3897,5.3897,5.3897,recipients on two different remote domains; email = gmail + outlook
 fmsg,m10p4x,1,18,89289,89289,89289,45120,44169,64443,103.6115,103.6115,103.6115,10-message round-robin across three domains
+email,m100p2,1,100,4313697,4313697,4313697,2033230,2280467,3875543,886.5649,886.5649,886.5649,"per-message growth analysis, long-thread stress"

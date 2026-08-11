@@ -34,12 +34,8 @@ on port 25, as mail servers really exchange it.
 | 1 | 9.6 kB | 25.0 kB | 4.8 kB |
 | 5 | 29.3 kB | 92.2 kB | 26.0 kB |
 | 20 | 103.9 kB | 425.2 kB | 132.4 kB |
-| 100 | **501.2 kB** | —† | — |
+| 100 | **501.2 kB** | 4.31 MB | — |
 | 200 | **998.5 kB** | — | 1.19 MB |
-
-† not yet measured: Gmail rejects direct senders whose IP lacks a custom
-PTR record once volume grows (it cut this run off at message 61) — the
-point will be added once the reverse-DNS entry lands.
 
 ![conversation growth](charts/conversation-growth.svg)
 
@@ -49,8 +45,9 @@ how deep the conversation is — by 200 messages it is the cheapest system
 measured, under WhatsApp's single multiplexed connection. Email's replies
 quote the entire history each time, so its per-message cost *grows*: by
 message 20 it is paying over 20 kB per message and the conversation has
-cost **4× fmsg** — and that is with 120-byte messages; the gap widens
-with longer ones. Even a single message costs less on fmsg than email
+cost **4× fmsg**; by message 100 it is paying ~49 kB per additional
+120-byte message and the conversation has cost **8.6× fmsg** — and the
+gap keeps widening with conversation depth and message length. Even a single message costs less on fmsg than email
 (9.6 kB vs 25.0 kB; the first-ever contact between two hosts pays full
 TLS handshakes and costs ~7 kB more, once).
 
@@ -121,10 +118,12 @@ cross the real internet and third-party infrastructure and are indicative
 only. fmsg numbers include its challenge-response verification (a second
 TLS connection on first contact per thread, under the default
 `HAS_NOT_PARTICIPATED` mode) and reflect TLS session resumption between
-hosts that have communicated within the ticket lifetime. Email's
-100-message point is pending a reverse-DNS fix at the ISP — itself a
-finding about what direct SMTP federation demands of a self-hosted
-sender. WhatsApp is a closed platform: only client↔server traffic is
+hosts that have communicated within the ticket lifetime. One deliverability
+note: Gmail intermittently hard-rejects direct senders whose IP lacks a
+matching PTR record once volume grows — a first attempt at the 100-message
+run was cut off at message 61 before a retry passed — a real constraint on
+self-hosted SMTP federation that fmsg's DNS binding does not impose.
+WhatsApp is a closed platform: only client↔server traffic is
 measurable, automation used whatsapp-web.js (against WhatsApp's ToS —
 tiny volumes, human-like pacing), extra "participants" are a group with
 one real second account, and unlike the other two systems it is

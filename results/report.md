@@ -33,7 +33,7 @@ median of the repetitions per scenario. Raw per-repetition data:
 | m1p3 | one message to 2 recipients | 9.7 kB | 20.3 kB | — |
 | m1p3x | one message to 2 recipients; recipients on two different domains | 19.2 kB | 35.1 kB | — |
 | m10p4x | 10 messages between 4 participants, each a reply to the previous; recipients on two different domains | 89.3 kB | 237.0 kB | — |
-| m100p2 | 100 messages between 2 participants, each a reply to the previous | 501.2 kB | — | — |
+| m100p2 | 100 messages between 2 participants, each a reply to the previous | 501.2 kB | 4.31 MB | — |
 
 ## Table 2 — transmission time (seconds, median)
 
@@ -63,12 +63,13 @@ median of the repetitions per scenario. Raw per-repetition data:
 | m1p3 | 1.3966 | 3.0951 | — |
 | m1p3x | 5.3897 | 5.1697 | — |
 | m10p4x | 103.6115 | 85.8401 | — |
-| m100p2 | 360.6928 | — | — |
+| m100p2 | 360.6928 | 886.5649 | — |
 
 ## Figures
 
 ![bytes-by-scenario](charts/bytes-by-scenario.svg)
 ![conversation-growth](charts/conversation-growth.svg)
+![conversation-growth-20](charts/conversation-growth-20.svg)
 ![fwd-cost](charts/fwd-cost.svg)
 
 ## Protocol capability differences
@@ -120,17 +121,17 @@ a capability gap, not a missing measurement:
 ## Appendix — software versions
 
 ```
-recorded: 2026-08-10T23:49:24Z
+recorded: 2026-08-11T00:16:25Z
 host: Linux 7.1.4-204.fc44.x86_64 x86_64 GNU/Linux
 
 ## workspace repos
-fmsg-spec: 49585f7 (2026-08-11) [origin/main: c2a5b18]
-fmsgd: 8a14a9f (2026-08-11) [origin/main: 5779f14]
+fmsg-spec: fee8e49 (2026-08-11) [origin/main: c2a5b18]
+fmsgd: 5779f14 (2026-08-10)
 fmsg-webapi: 06634b4 (2026-08-10) [origin/main: 6ef5136]
 fmsgid: 5a74176 (2026-08-03)
 fmsg-cli: f450ba5 (2026-08-05) [origin/main: e4ff0ca]
 fmsg-docker: 1feebdb (2026-08-11)
-fmsg-bench: 9742160 (2026-08-11)
+fmsg-bench: 49b2b59 (2026-08-11)
 
 ## tools
 tcpdump version 4.99.6
