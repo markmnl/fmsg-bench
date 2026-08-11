@@ -99,7 +99,8 @@ def main():
 
     add("## Figures")
     add("")
-    for name in ("bytes-by-scenario", "conversation-growth", "fwd-cost"):
+    for name in ("bytes-by-scenario", "conversation-growth",
+                 "conversation-growth-20", "fwd-cost"):
         if os.path.exists(os.path.join(RESULTS, "charts", f"{name}.svg")):
             add(f"![{name}](charts/{name}.svg)")
     add("")

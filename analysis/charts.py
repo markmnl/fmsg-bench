@@ -107,7 +107,7 @@ def fig_bytes_by_scenario(data, systems):
     return fig, "bytes-by-scenario"
 
 
-def fig_conversation_growth(data, systems):
+def _growth_fig(data, systems, max_n, name, title, xticks):
     fig, ax = plt.subplots(figsize=(7, 4))
     fig.patch.set_facecolor(SURFACE)
     style_axes(ax)
@@ -115,6 +115,8 @@ def fig_conversation_growth(data, systems):
     for sys_name in systems:
         xs, ys = [], []
         for sc, n in GROWTH_SERIES:
+            if n > max_n:
+                continue
             r = data.get((sys_name, sc))
             if r:
                 xs.append(n)
@@ -130,13 +132,25 @@ def fig_conversation_growth(data, systems):
     ax.set_xlabel("messages exchanged (each a reply to the previous)",
                   fontsize=9, color=SECONDARY)
     ax.set_ylabel("cumulative bytes on the wire", fontsize=9, color=SECONDARY)
-    ax.set_xticks([1, 5, 10, 20, 50, 100, 200])
+    ax.set_xticks(xticks)
     ax.yaxis.set_major_formatter(FuncFormatter(human_bytes))
     ax.grid(axis="y", color=GRID, linewidth=0.7, zorder=0)
-    ax.set_title("Conversation cost growth", fontsize=11, color=INK, loc="left")
+    ax.set_title(title, fontsize=11, color=INK, loc="left")
     ax.legend(frameon=False, fontsize=9, labelcolor=SECONDARY, loc="upper left")
     fig.tight_layout()
-    return fig, "conversation-growth"
+    return fig, name
+
+
+def fig_conversation_growth(data, systems):
+    return _growth_fig(data, systems, 1000, "conversation-growth",
+                       "Conversation cost growth", [1, 5, 10, 20, 50, 100, 200])
+
+
+def fig_conversation_growth_20(data, systems):
+    """Same series cut at 20 messages — where all three systems have data."""
+    return _growth_fig(data, systems, 20, "conversation-growth-20",
+                       "Conversation cost growth (first 20 messages)",
+                       [1, 2, 3, 4, 5, 10, 20])
 
 
 def fig_fwd_cost(data, systems):
@@ -181,6 +195,7 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     for fig, name in (fig_bytes_by_scenario(data, systems),
                       fig_conversation_growth(data, systems),
+                      fig_conversation_growth_20(data, systems),
                       fig_fwd_cost(data, systems)):
         for ext in ("svg", "png"):
             fig.savefig(os.path.join(OUT_DIR, f"{name}.{ext}"),
