@@ -97,11 +97,11 @@ a capability gap, not a missing measurement:
   the real internet — indicative, like email's.
 - **email**: self-hosted mailcow ↔ Gmail (and, in cross-provider
   scenarios, ↔ Outlook via Microsoft Graph) over the public internet.
-  Outbound leaves via a smarthost relay (port 2525) — typical for
-  residential hosting where ISPs block direct port 25 — so the measured
-  outbound hop is mailcow→relay; inbound is Gmail→mailcow on port 25,
-  filtered to Google's published netblocks. Replies are generated via the
-  Gmail API with standard threading headers and full quoted history.
+  Delivery is direct MX-to-MX on port 25 in both directions (no relay
+  or smarthost), captured on the mail host's WAN interface and filtered
+  to Google's and Microsoft's published SMTP netblocks. Replies are
+  generated via the Gmail API / Microsoft Graph with standard threading
+  headers and full quoted history.
   Timings cross the internet and Gmail's internals: indicative, not
   replicable. Submission (client→server) is excluded by design.
 - **whatsapp**: closed platform — no host-to-host wire exists to observe.
